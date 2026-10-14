@@ -49,6 +49,9 @@ export const MOCK_SPENDABLE_TOKENS = 2450;
 /** Default bond on the nominate screen, in whole tokens. */
 export const DEFAULT_BOND_TOKENS = 500;
 
+/** Placeholder tx shown after the mock wallet signature. Not broadcast. */
+export const MOCK_NOMINATION_TX = "0x7be14cd290af";
+
 /** Pre-selected validators on the nominate screen. */
 export const DEFAULT_NOMINATION_IDS = [
   "lagos-validator",
