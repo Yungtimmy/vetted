@@ -15,8 +15,10 @@ import type { ValidatorDataProvider } from "@/lib/types";
  * H160 account ids returned by the EVM side are Portaldot account ids,
  * not Ethereum addresses. Token symbol and decimals come from
  * NEXT_PUBLIC_TOKEN_SYMBOL and NEXT_PUBLIC_TOKEN_DECIMALS
- * (placeholders tPOTv3 and 14 when unset). Chain id and both RPC URLs
- * are env-driven the same way. Portaldot has not confirmed them.
+ * (confirmed defaults tPOT and 14 when unset). Chain id and both RPC
+ * URLs are env-driven the same way. Official endpoints are in
+ * `.env.example`. Scores will be mainnet history published on the
+ * testnet contract, with the testnet's live validators alongside.
  */
 export function getDataProvider(): ValidatorDataProvider {
   return mockProvider;

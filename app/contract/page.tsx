@@ -1,16 +1,22 @@
 import type { Metadata } from "next";
+import { eventKey, INDEXED_EVENTS } from "@/lib/chain-events";
 import {
+  BLOCK_TIME_SECONDS,
   CHAIN_ID,
   CHAIN_ID_FROM_ENV,
+  ERA_DURATION_HOURS,
   EVM_RPC_URL,
   EXPLORER_URL,
+  HISTORY_DEPTH_ERAS,
   MIN_ERAS_TO_SCORE,
   NETWORK_NAME,
   NOMINATION_CAP,
+  SESSION_BLOCKS,
+  SESSIONS_PER_ERA,
+  SS58_PREFIX,
   SUBSTRATE_RPC_URL,
   TOKEN_DECIMALS,
   TOKEN_DECIMALS_FROM_ENV,
-  TOKEN_DISPLAY_SYMBOL,
   TOKEN_SYMBOL,
   TOKEN_SYMBOL_FROM_ENV,
 } from "@/lib/config";
@@ -52,7 +58,7 @@ export default function ContractPage() {
           value={
             CHAIN_ID_FROM_ENV
               ? String(CHAIN_ID)
-              : `${CHAIN_ID} · unconfirmed placeholder`
+              : `${CHAIN_ID} · confirmed default`
           }
           mono
         />
@@ -61,7 +67,7 @@ export default function ContractPage() {
           value={
             TOKEN_SYMBOL_FROM_ENV
               ? TOKEN_SYMBOL
-              : `${TOKEN_SYMBOL} (${TOKEN_DISPLAY_SYMBOL} on cards) · placeholder`
+              : `${TOKEN_SYMBOL} · confirmed default`
           }
         />
         <Fact
@@ -69,13 +75,29 @@ export default function ContractPage() {
           value={
             TOKEN_DECIMALS_FROM_ENV
               ? String(TOKEN_DECIMALS)
-              : `${TOKEN_DECIMALS} · placeholder`
+              : `${TOKEN_DECIMALS} · confirmed default`
           }
           mono
         />
+        <Fact label="SS58 prefix" value={String(SS58_PREFIX)} mono />
+        <Fact label="Block time" value={`${BLOCK_TIME_SECONDS}s`} mono />
+        <Fact label="Session" value={`${SESSION_BLOCKS} blocks`} mono />
+        <Fact
+          label="Era"
+          value={`${SESSIONS_PER_ERA} sessions · ~${ERA_DURATION_HOURS}h`}
+          mono
+        />
+        <Fact label="History depth" value={`${HISTORY_DEPTH_ERAS} eras`} mono />
         <Fact label="Eras before a score" value={String(MIN_ERAS_TO_SCORE)} mono />
         <Fact label="Nomination cap" value={`${NOMINATION_CAP} slots · placeholder`} mono />
       </dl>
+      <p className="mt-4 text-sm text-muted">
+        Scores will be built from mainnet history and published on the testnet
+        contract. The two validators in the testnet session set are tagged
+        Testnet live and listed next to that history. The nomination cap stays{" "}
+        {NOMINATION_CAP} because the staking pallet does not publish
+        MaxNominations.
+      </p>
       <p className="mt-4 text-sm text-muted">
         H160 account ids on Portaldot are 20-byte account ids. They are not
         Ethereum addresses, even when a wallet displays them with an 0x prefix.
@@ -103,12 +125,12 @@ export default function ContractPage() {
       <h2 className="mt-8 text-lg">Endpoints</h2>
       <p className="mt-2 text-sm text-muted">
         Copy <code className="font-mono text-fg">.env.example</code> to{" "}
-        <code className="font-mono text-fg">.env.local</code>. Portaldot has not
-        confirmed the V3 testnet RPC or chain id, so empty values are expected.
-        Unset chain id, symbol, and decimals fall back to the placeholders
-        documented in that file. &quot;View on-chain&quot; links open the
-        explorer when <code className="font-mono text-fg">NEXT_PUBLIC_EXPLORER_URL</code>{" "}
-        is set, and stay on this page until then.
+        <code className="font-mono text-fg">.env.local</code>. That file has
+        the official V3 endpoints. Unset chain id, symbol, and decimals fall
+        back to the confirmed defaults. &quot;View on-chain&quot; links open
+        the explorer when{" "}
+        <code className="font-mono text-fg">NEXT_PUBLIC_EXPLORER_URL</code> is
+        set, and stay on this page until then.
       </p>
       <ul className="mt-4 space-y-2">
         {ENDPOINTS.map(([name, value]) => (
@@ -116,6 +138,25 @@ export default function ContractPage() {
             <code className="font-mono text-xs text-fg">{name}</code>
             <span className="font-mono text-xs text-muted">
               {value ? value : "Not set"}
+            </span>
+          </li>
+        ))}
+      </ul>
+
+      <h2 className="mt-8 text-lg">Indexer events</h2>
+      <p className="mt-2 text-sm text-muted">
+        Field order for the events a later indexer will decode. Nothing
+        subscribes to these yet.
+      </p>
+      <ul className="mt-4 space-y-2">
+        {INDEXED_EVENTS.map((event) => (
+          <li
+            key={eventKey(event)}
+            className="card flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <code className="font-mono text-xs text-fg">{eventKey(event)}</code>
+            <span className="font-mono text-xs text-muted">
+              {event.fields.join(", ")}
             </span>
           </li>
         ))}
