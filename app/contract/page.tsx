@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import {
   CHAIN_ID,
+  CHAIN_ID_FROM_ENV,
   EVM_RPC_URL,
   EXPLORER_URL,
   MIN_ERAS_TO_SCORE,
@@ -8,8 +9,10 @@ import {
   NOMINATION_CAP,
   SUBSTRATE_RPC_URL,
   TOKEN_DECIMALS,
+  TOKEN_DECIMALS_FROM_ENV,
   TOKEN_DISPLAY_SYMBOL,
   TOKEN_SYMBOL,
+  TOKEN_SYMBOL_FROM_ENV,
 } from "@/lib/config";
 
 export const metadata: Metadata = {
@@ -18,6 +21,12 @@ export const metadata: Metadata = {
 };
 
 const ENDPOINTS = [
+  ["NEXT_PUBLIC_CHAIN_ID", CHAIN_ID_FROM_ENV ? String(CHAIN_ID) : ""],
+  ["NEXT_PUBLIC_TOKEN_SYMBOL", TOKEN_SYMBOL_FROM_ENV ? TOKEN_SYMBOL : ""],
+  [
+    "NEXT_PUBLIC_TOKEN_DECIMALS",
+    TOKEN_DECIMALS_FROM_ENV ? String(TOKEN_DECIMALS) : "",
+  ],
   ["NEXT_PUBLIC_SUBSTRATE_RPC_URL", SUBSTRATE_RPC_URL],
   ["NEXT_PUBLIC_EVM_RPC_URL", EVM_RPC_URL],
   ["NEXT_PUBLIC_EXPLORER_URL", EXPLORER_URL],
@@ -38,11 +47,34 @@ export default function ContractPage() {
       <h2 className="mt-8 text-lg">Chain</h2>
       <dl className="mt-4 grid gap-3 sm:grid-cols-2">
         <Fact label="Network" value={NETWORK_NAME} />
-        <Fact label="Chain ID" value={String(CHAIN_ID)} mono />
-        <Fact label="Token" value={`${TOKEN_SYMBOL} (${TOKEN_DISPLAY_SYMBOL} on cards)`} />
-        <Fact label="Decimals" value={String(TOKEN_DECIMALS)} mono />
+        <Fact
+          label="Chain ID"
+          value={
+            CHAIN_ID_FROM_ENV
+              ? String(CHAIN_ID)
+              : `${CHAIN_ID} · unconfirmed placeholder`
+          }
+          mono
+        />
+        <Fact
+          label="Token"
+          value={
+            TOKEN_SYMBOL_FROM_ENV
+              ? TOKEN_SYMBOL
+              : `${TOKEN_SYMBOL} (${TOKEN_DISPLAY_SYMBOL} on cards) · placeholder`
+          }
+        />
+        <Fact
+          label="Decimals"
+          value={
+            TOKEN_DECIMALS_FROM_ENV
+              ? String(TOKEN_DECIMALS)
+              : `${TOKEN_DECIMALS} · placeholder`
+          }
+          mono
+        />
         <Fact label="Eras before a score" value={String(MIN_ERAS_TO_SCORE)} mono />
-        <Fact label="Nomination cap" value={`${NOMINATION_CAP} slots`} mono />
+        <Fact label="Nomination cap" value={`${NOMINATION_CAP} slots · placeholder`} mono />
       </dl>
       <p className="mt-4 text-sm text-muted">
         H160 account ids on Portaldot are 20-byte account ids. They are not
@@ -71,9 +103,11 @@ export default function ContractPage() {
       <h2 className="mt-8 text-lg">Endpoints</h2>
       <p className="mt-2 text-sm text-muted">
         Copy <code className="font-mono text-fg">.env.example</code> to{" "}
-        <code className="font-mono text-fg">.env.local</code>. Empty values are
-        expected until a node is available. &quot;View on-chain&quot; links open
-        the explorer when <code className="font-mono text-fg">NEXT_PUBLIC_EXPLORER_URL</code>{" "}
+        <code className="font-mono text-fg">.env.local</code>. Portaldot has not
+        confirmed the V3 testnet RPC or chain id, so empty values are expected.
+        Unset chain id, symbol, and decimals fall back to the placeholders
+        documented in that file. &quot;View on-chain&quot; links open the
+        explorer when <code className="font-mono text-fg">NEXT_PUBLIC_EXPLORER_URL</code>{" "}
         is set, and stay on this page until then.
       </p>
       <ul className="mt-4 space-y-2">

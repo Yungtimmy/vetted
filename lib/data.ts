@@ -13,7 +13,10 @@ import type { ValidatorDataProvider } from "@/lib/types";
  *   the 0–100 score, the era it was published in, and the publishing tx.
  *
  * H160 account ids returned by the EVM side are Portaldot account ids,
- * not Ethereum addresses. Token amounts use tPOTv3 with 14 decimals.
+ * not Ethereum addresses. Token symbol and decimals come from
+ * NEXT_PUBLIC_TOKEN_SYMBOL and NEXT_PUBLIC_TOKEN_DECIMALS
+ * (placeholders tPOTv3 and 14 when unset). Chain id and both RPC URLs
+ * are env-driven the same way. Portaldot has not confirmed them.
  */
 export function getDataProvider(): ValidatorDataProvider {
   return mockProvider;
