@@ -69,15 +69,17 @@ function NavLinks({ pathname }: { pathname: string }) {
 function NetworkCard({
   networkName,
   era,
+  sampleData,
 }: {
   networkName: string;
   era: number;
+  sampleData: boolean;
 }) {
   return (
     <div className="mt-8 rounded-lg border border-line p-2.5 text-xs text-muted">
       <div className="flex items-center">
         <span
-          className="mr-1.5 inline-block h-[7px] w-[7px] rounded-full bg-grade-a"
+          className={`mr-1.5 inline-block h-[7px] w-[7px] rounded-full ${sampleData ? "bg-grade-c" : "bg-grade-a"}`}
           aria-hidden
         />
         {networkName}
@@ -89,13 +91,30 @@ function NetworkCard({
   );
 }
 
+function SampleDataBanner() {
+  return (
+    <p
+      role="status"
+      className="mb-4 flex items-center gap-2 rounded-lg border border-line bg-panel px-3 py-2 text-xs text-fg"
+    >
+      <span
+        className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-grade-c"
+        aria-hidden
+      />
+      Testnet not connected — showing sample data
+    </p>
+  );
+}
+
 export function AppShell({
   networkName,
   era,
+  sampleData,
   children,
 }: {
   networkName: string;
   era: number;
+  sampleData: boolean;
   children: ReactNode;
 }) {
   const pathname = usePathname();
@@ -122,15 +141,26 @@ export function AppShell({
           className="border-b border-line bg-nav px-3.5 py-3 md:hidden"
         >
           <NavLinks pathname={pathname} />
-          <NetworkCard networkName={networkName} era={era} />
+          <NetworkCard
+            networkName={networkName}
+            era={era}
+            sampleData={sampleData}
+          />
         </div>
       ) : null}
       <aside className="hidden border-r border-line bg-nav px-3.5 py-5 md:block">
         <Logo />
         <NavLinks pathname={pathname} />
-        <NetworkCard networkName={networkName} era={era} />
+        <NetworkCard
+          networkName={networkName}
+          era={era}
+          sampleData={sampleData}
+        />
       </aside>
-      <main className="min-w-0 px-4 py-5 md:px-7 md:py-6">{children}</main>
+      <main className="min-w-0 px-4 py-5 md:px-7 md:py-6">
+        {sampleData ? <SampleDataBanner /> : null}
+        {children}
+      </main>
     </div>
   );
 }

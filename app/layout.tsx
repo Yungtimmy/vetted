@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import { AppShell } from "@/components/app-shell";
+import { RPC_CONFIGURED } from "@/lib/config";
 import { getDataProvider } from "@/lib/data";
 import "./globals.css";
 
@@ -44,7 +45,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       className={`${inter.variable} ${space.variable} ${mono.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-bg font-sans text-fg">
-        <AppShell networkName={overview.name} era={overview.era}>
+        <AppShell
+          networkName={overview.name}
+          era={overview.era}
+          sampleData={!RPC_CONFIGURED}
+        >
           {children}
         </AppShell>
       </body>
