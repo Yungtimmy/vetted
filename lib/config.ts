@@ -1,12 +1,12 @@
 /**
  * Chain settings.
  *
- * Portaldot has not confirmed the V3 testnet RPC or chain id, and the
- * previous wss endpoint is down. Live values come from NEXT_PUBLIC_
- * variables. The numbers in this file are unconfirmed placeholders used
- * only when the matching variable is unset. The same placeholders are
- * documented in `.env.example`.
+ * Portaldot published the V3 testnet endpoints. Chain id, token, and
+ * RPC URLs are read from NEXT_PUBLIC_ variables. The values in this
+ * file are the confirmed defaults used only when the matching variable
+ * is unset. `.env.example` documents the same endpoints.
  *
+ * SS58 prefix and era timing are chain facts, not env vars.
  * An H160 on this chain is a 20-byte account id. It is not an Ethereum
  * address.
  */
@@ -24,20 +24,20 @@ function envInt(value: string | undefined): number | null {
   return parsed;
 }
 
-/** Unconfirmed. Not a chain id Portaldot has published for V3. */
+/** Confirmed V3 testnet chain id. Used when NEXT_PUBLIC_CHAIN_ID is unset. */
 const FALLBACK_CHAIN_ID = 420420777;
 
-/** Unconfirmed asset symbol. Report cards shorten this to tPOT. */
-const FALLBACK_TOKEN_SYMBOL = "tPOTv3";
+/** Confirmed asset symbol (`system_properties.tokenSymbol`). */
+const FALLBACK_TOKEN_SYMBOL = "tPOT";
 
-/** Unconfirmed decimal count for that asset. */
+/** Confirmed decimal count (`system_properties.tokenDecimals`). */
 const FALLBACK_TOKEN_DECIMALS = 14;
 
 const chainIdFromEnv = envInt(process.env.NEXT_PUBLIC_CHAIN_ID);
 
 export const CHAIN_ID = chainIdFromEnv ?? FALLBACK_CHAIN_ID;
 
-/** False when the UI is showing the unconfirmed placeholder chain id. */
+/** False when the UI is using the confirmed fallback chain id. */
 export const CHAIN_ID_FROM_ENV = chainIdFromEnv != null;
 
 const tokenSymbolFromEnv = envString(process.env.NEXT_PUBLIC_TOKEN_SYMBOL);
@@ -52,14 +52,34 @@ export const TOKEN_DECIMALS = tokenDecimalsFromEnv ?? FALLBACK_TOKEN_DECIMALS;
 
 export const TOKEN_DECIMALS_FROM_ENV = tokenDecimalsFromEnv != null;
 
-/**
- * Short label on report cards. The placeholder asset stays "tPOT".
- * A symbol set in the environment is shown as-is.
- */
-export const TOKEN_DISPLAY_SYMBOL =
-  TOKEN_SYMBOL === FALLBACK_TOKEN_SYMBOL ? "tPOT" : TOKEN_SYMBOL;
+/** Label on report cards. The confirmed symbol is already short. */
+export const TOKEN_DISPLAY_SYMBOL = TOKEN_SYMBOL;
 
-export const NETWORK_NAME = "Portaldot V3 testnet";
+/** `system_chain` on the V3 testnet node. */
+export const CHAIN_NAME = "PortaldotV3 Test";
+
+export const NETWORK_NAME = CHAIN_NAME;
+
+/** SS58 address prefix (`system_properties.ss58Format`). */
+export const SS58_PREFIX = 42;
+
+/** Target block time, in seconds. */
+export const BLOCK_TIME_SECONDS = 6;
+
+/** Blocks in one session. */
+export const SESSION_BLOCKS = 600;
+
+/** Sessions in one era. Six of these at 6s is about 6 hours. */
+export const SESSIONS_PER_ERA = 6;
+
+/** 6 × 600 × 6 seconds. */
+export const ERA_DURATION_SECONDS =
+  BLOCK_TIME_SECONDS * SESSION_BLOCKS * SESSIONS_PER_ERA;
+
+export const ERA_DURATION_HOURS = ERA_DURATION_SECONDS / 3600;
+
+/** Eras of history the node retains. */
+export const HISTORY_DEPTH_ERAS = 84;
 
 /** Era the mock provider reports. Live data will read this from the chain. */
 export const CURRENT_ERA = 1284;
@@ -72,13 +92,13 @@ export const MIN_ERAS_TO_SCORE = 28;
 
 /**
  * Maximum validators in one nomination set.
- * This stays a code placeholder (not an env var) until the staking
- * pallet's nomination limit is read from the chain.
+ * The staking pallet does not publish MaxNominations. This stays 16
+ * until a limit is read from the chain. It is not an env var.
  */
 export const NOMINATION_CAP = 16;
 
-/** Window for slash counts and the rewards chart. */
-export const SLASH_WINDOW_ERAS = 84;
+/** Slash counts and the rewards chart use the chain history depth. */
+export const SLASH_WINDOW_ERAS = HISTORY_DEPTH_ERAS;
 
 /** Window for the era-point sparkline and chill counts. */
 export const ERA_POINTS_WINDOW = 30;

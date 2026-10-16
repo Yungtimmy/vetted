@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { GradeBadge, gradeColor } from "@/components/grade-badge";
+import { SourceBadge } from "@/components/source-badge";
 import { Sparkline } from "@/components/sparkline";
 import { ERA_POINTS_WINDOW, SLASH_WINDOW_ERAS } from "@/lib/config";
 import { formatPercent, shortSs58 } from "@/lib/format";
@@ -157,6 +158,9 @@ export function Leaderboard({
                       >
                         {validator.name}
                       </Link>
+                      <div className="mt-1">
+                        <SourceBadge source={validator.source} />
+                      </div>
                       <div className="truncate font-mono text-xs text-muted">
                         {shortSs58(validator.ss58)}
                       </div>
@@ -219,12 +223,15 @@ export function Leaderboard({
                       <GradeBadge grade={validator.grade} score={validator.score} />
                     </td>
                     <td>
-                      <Link
-                        href={`/validator/${validator.id}`}
-                        className="font-medium text-fg hover:underline"
-                      >
-                        {validator.name}
-                      </Link>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Link
+                          href={`/validator/${validator.id}`}
+                          className="font-medium text-fg hover:underline"
+                        >
+                          {validator.name}
+                        </Link>
+                        <SourceBadge source={validator.source} />
+                      </div>
                       <div className="font-mono text-xs text-muted">
                         {shortSs58(validator.ss58)}
                       </div>

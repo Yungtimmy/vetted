@@ -13,6 +13,7 @@ import type {
   ScoreFactor,
   Validator,
   ValidatorDataProvider,
+  ValidatorSource,
 } from "@/lib/types";
 
 function mulberry32(seed: number): () => number {
@@ -64,6 +65,8 @@ interface Draft {
   factors: ScoreFactor[];
   history: HistoryEvent[];
   scoreTx: string | null;
+  /** Omitted rows stand in for mainnet-history scores. */
+  source?: ValidatorSource;
 }
 
 function build(draft: Draft): Validator {
@@ -86,6 +89,7 @@ function build(draft: Draft): Validator {
     factors: draft.factors,
     history: draft.history,
     scoreTx: draft.scoreTx,
+    source: draft.source ?? "mainnet-history",
   };
 }
 
@@ -143,6 +147,8 @@ const drafts: Draft[] = [
       { id: "ibadan-chill", kind: "CHILL", summary: "Chilled", era: 1251 },
     ],
     scoreTx: "0xb22d44e018aa77c0bb22",
+    // Stands in for one of the two validators in the testnet session set.
+    source: "testnet-live",
   },
   {
     id: "abuja-secure",
@@ -374,6 +380,8 @@ const drafts: Draft[] = [
     factors: [],
     history: [],
     scoreTx: null,
+    // Stands in for one of the two validators in the testnet session set.
+    source: "testnet-live",
   },
 ];
 
@@ -409,6 +417,10 @@ function assertMock(list: Validator[]): void {
   const setScore = weightedSetScore(defaults);
   if (setScore !== 86) {
     throw new Error(`default nomination set scores ${setScore}, expected 86`);
+  }
+  const live = list.filter((validator) => validator.source === "testnet-live");
+  if (live.length !== 2) {
+    throw new Error(`expected 2 testnet-live validators, found ${live.length}`);
   }
 }
 
