@@ -64,7 +64,7 @@ Leave the React screens alone. Implement `ValidatorDataProvider` and return it f
 6. **Explorer links.** Set `NEXT_PUBLIC_EXPLORER_URL` (no trailing slash). "View score on-chain" and "View on Portaldot explorer" append `/tx/<hash>`. Until that variable is set, both links stay inside the app on `/contract`.
 7. **Signing.** "Sign in your wallet" does not submit an extrinsic. Wire a wallet, then call the staking nominate extrinsic with the selected set and the bond amount. The mock success tx is `MOCK_NOMINATION_TX` in `lib/config.ts`.
 
-Copy `.env.example` to `.env.local`. Leave the RPC URLs empty until an endpoint exists. The commented placeholders in that file are what the app uses when a variable is unset.
+Copy `.env.example` to `.env.local`. Leave the RPC URLs empty until an endpoint exists. The commented placeholders in that file are what the app uses when a variable is unset. With both RPC URLs empty, every page shows the banner "Testnet not connected — showing sample data". Set either URL and the banner goes away. The tables still use the mock provider until the client is implemented.
 
 ## Not in this scaffold
 
