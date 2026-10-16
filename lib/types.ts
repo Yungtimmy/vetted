@@ -1,5 +1,16 @@
 export type Grade = "A" | "B" | "C" | "D" | "F" | "NEW";
 
+/**
+ * Mainnet history: a score built from mainnet eras and published on the
+ * testnet contract. Testnet live: a validator in the testnet session set.
+ */
+export type ValidatorSource = "mainnet-history" | "testnet-live";
+
+export const VALIDATOR_SOURCE_LABEL: Record<ValidatorSource, string> = {
+  "mainnet-history": "Mainnet history",
+  "testnet-live": "Testnet live",
+};
+
 export type HistoryKind = "COMMISSION" | "CHILL" | "SLASH";
 
 /** One line in the "why this score" breakdown. */
@@ -56,6 +67,8 @@ export interface Validator {
   history: HistoryEvent[];
   /** Transaction that published the latest score, when one exists. */
   scoreTx: string | null;
+  /** Where this row's history comes from. */
+  source: ValidatorSource;
 }
 
 export interface NetworkOverview {

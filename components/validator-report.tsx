@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { GradeSeal } from "@/components/grade-badge";
 import { RewardsChart } from "@/components/rewards-chart";
+import { SourceBadge } from "@/components/source-badge";
 import { TextLink } from "@/components/text-link";
 import {
   MIN_ERAS_TO_SCORE,
@@ -39,7 +40,10 @@ export function ValidatorReport({
           <Link href="/" className="text-sm text-muted hover:text-fg">
             ← Leaderboard
           </Link>
-          <h1 className="mt-1">{validator.name}</h1>
+          <div className="mt-1 flex flex-wrap items-center gap-2">
+            <h1>{validator.name}</h1>
+            <SourceBadge source={validator.source} />
+          </div>
           <p className="font-mono text-xs text-muted">
             {shortSs58(validator.ss58)}
             {scored ? ` · H160 ${shortHex(validator.h160)}` : ""}

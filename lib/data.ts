@@ -33,4 +33,5 @@ export type {
   ScoreFactor,
   Validator,
   ValidatorDataProvider,
+  ValidatorSource,
 } from "@/lib/types";
