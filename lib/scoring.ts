@@ -30,7 +30,7 @@ export function weightedSetScore(validators: Validator[]): number | null {
   let weight = 0;
   let total = 0;
   for (const validator of validators) {
-    if (validator.score == null) continue;
+    if (validator.grade === "NEW" || validator.score == null) continue;
     weight += validator.stakeWeight;
     total += validator.score * validator.stakeWeight;
   }

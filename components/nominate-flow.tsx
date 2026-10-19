@@ -2,17 +2,21 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { LoadNote } from "@/components/data-states";
 import { GradeBadge, GradeSeal, gradeColor } from "@/components/grade-badge";
+import { NominateSkeleton } from "@/components/skeletons";
 import { TextLink } from "@/components/text-link";
 import {
   DEFAULT_BOND_TOKENS,
   DEFAULT_NOMINATION_IDS,
+  MIN_ERAS_TO_SCORE,
   MOCK_NOMINATION_TX,
   MOCK_SPENDABLE_TOKENS,
   NOMINATION_CAP,
   TOKEN_DISPLAY_SYMBOL,
 } from "@/lib/config";
 import {
+  erasRecorded,
   explorerTxHref,
   formatEra,
   formatReward,
@@ -50,10 +54,12 @@ export function NominateFlow({
   validators,
   era,
   addId,
+  status,
 }: {
   validators: Validator[];
   era: number;
   addId: string | null;
+  status: "ready" | "loading" | "empty" | "error";
 }) {
   const known = new Set(validators.map((validator) => validator.id));
   const [selectedIds, setSelectedIds] = useState(() =>
@@ -77,6 +83,9 @@ export function NominateFlow({
   const amount = parseBond(bond);
   const reward = estimateRewardPerEra(amount, score);
   const canContinue = selected.length > 0 && amount > 0;
+  const unscored = selected.filter(
+    (validator) => validator.grade === "NEW" || validator.score == null,
+  );
 
   const visible = validators
     .filter((validator) => (hideRisky ? !isRiskyGrade(validator.grade) : true))
@@ -102,6 +111,27 @@ export function NominateFlow({
   function sign() {
     setPhase("signing");
     window.setTimeout(() => setPhase("sent"), 700);
+  }
+
+  if (status === "loading") return <NominateSkeleton />;
+
+  if (status === "error" || status === "empty") {
+    return (
+      <div>
+        <h1>Build your nomination set</h1>
+        <div className="mt-3">
+          <LoadNote
+            message={
+              status === "error"
+                ? "The nomination list could not be loaded."
+                : "No validators returned."
+            }
+            action="Retry"
+            actionHref="/nominate"
+          />
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -133,6 +163,7 @@ export function NominateFlow({
           score={score}
           grade={grade}
           findings={findings}
+          unscored={unscored}
           bond={bond}
           reward={reward}
           canContinue={canContinue}
@@ -154,6 +185,7 @@ export function NominateFlow({
           selected={selected}
           amount={amount}
           score={score}
+          unscored={unscored}
           warning={warning}
           signing={phase === "signing"}
           onSign={sign}
@@ -172,6 +204,7 @@ function ChooseStep({
   score,
   grade,
   findings,
+  unscored,
   bond,
   reward,
   canContinue,
@@ -192,6 +225,7 @@ function ChooseStep({
   score: number | null;
   grade: ReturnType<typeof gradeForScore> | null;
   findings: ReturnType<typeof setFindings>;
+  unscored: Validator[];
   bond: string;
   reward: number | null;
   canContinue: boolean;
@@ -259,6 +293,7 @@ function ChooseStep({
             score={score}
             grade={grade}
             findings={findings}
+            unscored={unscored}
             bond={bond}
             reward={reward}
             canContinue={canContinue}
@@ -285,7 +320,7 @@ function ValidatorCard({
   const note = risky
     ? "Risky, not recommended"
     : validator.grade === "NEW"
-      ? "New, unscored"
+      ? erasRecorded(validator.activeEras, MIN_ERAS_TO_SCORE)
       : null;
 
   return (
@@ -345,6 +380,7 @@ function SetPanel({
   score,
   grade,
   findings,
+  unscored,
   bond,
   reward,
   canContinue,
@@ -356,6 +392,7 @@ function SetPanel({
   score: number | null;
   grade: ReturnType<typeof gradeForScore> | null;
   findings: ReturnType<typeof setFindings>;
+  unscored: Validator[];
   bond: string;
   reward: number | null;
   canContinue: boolean;
@@ -402,6 +439,12 @@ function SetPanel({
           <div className="text-xs text-muted">Set score, weighted by stake</div>
         </div>
       </div>
+      {unscored.map((validator) => (
+        <p className="mb-2 text-xs text-muted" key={validator.id}>
+          {validator.name} is left out of the set score (
+          {erasRecorded(validator.activeEras, MIN_ERAS_TO_SCORE)}).
+        </p>
+      ))}
       {findings.length === 0 ? (
         <p className="py-2 text-sm text-muted">Add a validator to score this set.</p>
       ) : (
@@ -409,7 +452,7 @@ function SetPanel({
           {findings.map((finding) => (
             <div className="fx" key={finding.text}>
               <span className={finding.tone === "ok" ? "pos" : "warn"} aria-hidden>
-                {finding.tone === "ok" ? "✓" : "!"}
+                {finding.tone === "ok" ? "✓" : "·"}
               </span>
               <span className="ml-2 flex-1">{finding.text}</span>
             </div>
@@ -462,6 +505,7 @@ function ReviewStep({
   selected,
   amount,
   score,
+  unscored,
   warning,
   signing,
   onSign,
@@ -469,6 +513,7 @@ function ReviewStep({
   selected: Validator[];
   amount: number;
   score: number | null;
+  unscored: Validator[];
   warning: string | null;
   signing: boolean;
   onSign: () => void;
@@ -495,6 +540,12 @@ function ReviewStep({
             {score == null ? "n/a" : `${score}/100`}
           </span>
         </div>
+        {unscored.map((validator) => (
+          <p className="mt-2 text-xs text-muted" key={validator.id}>
+            {validator.name} is left out of the set score (
+            {erasRecorded(validator.activeEras, MIN_ERAS_TO_SCORE)}).
+          </p>
+        ))}
         {warning ? <p className="mt-2 text-sm caution">{warning}</p> : null}
         <button
           type="button"

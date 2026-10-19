@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { GradeSeal } from "@/components/grade-badge";
+import { GradeSeal, gradeColor } from "@/components/grade-badge";
 import { RewardsChart } from "@/components/rewards-chart";
 import { SourceBadge } from "@/components/source-badge";
+import { Sparkline } from "@/components/sparkline";
 import { TextLink } from "@/components/text-link";
 import {
   MIN_ERAS_TO_SCORE,
@@ -9,6 +10,7 @@ import {
   TOKEN_DISPLAY_SYMBOL,
 } from "@/lib/config";
 import {
+  erasRecorded,
   explorerTxHref,
   formatDelta,
   formatEra,
@@ -96,6 +98,13 @@ function ScoredReport({
             Era {formatEra(era)}
             {validator.scoreTx ? ` · tx ${shortHex(validator.scoreTx)}` : ""}
           </p>
+          <div className="mt-3 flex justify-center">
+            <Sparkline
+              values={validator.eraPoints}
+              color={gradeColor(validator.grade)}
+              label={`${validator.name} era points`}
+            />
+          </div>
         </section>
 
         <section className="card">
@@ -170,9 +179,12 @@ function NewReport({ validator }: { validator: Validator }) {
       <section className="card text-center">
         <GradeSeal grade="NEW" />
         <p className="mt-3">Not enough history</p>
+        <p className="text-sm text-fg">
+          {erasRecorded(validator.activeEras, MIN_ERAS_TO_SCORE)}
+        </p>
         <p className="text-xs text-muted">
-          Active for {validator.activeEras} eras. We need {MIN_ERAS_TO_SCORE}{" "}
-          eras to score fairly.
+          No grade until {MIN_ERAS_TO_SCORE} eras are on record. Left out of
+          the set score.
         </p>
       </section>
       <section className="card">

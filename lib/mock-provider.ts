@@ -418,6 +418,14 @@ function assertMock(list: Validator[]): void {
   if (setScore !== 86) {
     throw new Error(`default nomination set scores ${setScore}, expected 86`);
   }
+  const harmattan = list.find((validator) => validator.id === "harmattan-node");
+  if (!harmattan || harmattan.grade !== "NEW" || harmattan.score != null) {
+    throw new Error("harmattan-node should be an unscored NEW validator");
+  }
+  const withNew = weightedSetScore([...defaults, harmattan]);
+  if (withNew !== 86) {
+    throw new Error(`NEW validator changed the set score to ${withNew}`);
+  }
   const live = list.filter((validator) => validator.source === "testnet-live");
   if (live.length !== 2) {
     throw new Error(`expected 2 testnet-live validators, found ${live.length}`);
