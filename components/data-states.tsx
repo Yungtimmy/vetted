@@ -18,3 +18,15 @@ export function LoadNote({
     </p>
   );
 }
+
+/** Stand-in for a figure the live provider does not read yet. */
+export function NotTracked() {
+  return (
+    <span title="Not tracked yet">
+      <span aria-hidden="true">—</span>{" "}
+      <span className="font-sans text-xs font-normal text-muted">
+        Not tracked yet
+      </span>
+    </span>
+  );
+}

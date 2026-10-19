@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import { LoadNote } from "@/components/data-states";
+import { useMemo, useState, type ReactNode } from "react";
+import { LoadNote, NotTracked } from "@/components/data-states";
 import { GradeBadge, gradeColor } from "@/components/grade-badge";
 import { LeaderboardSkeleton } from "@/components/skeletons";
 import { SourceBadge } from "@/components/source-badge";
@@ -100,12 +100,24 @@ export function Leaderboard({
         />
         <Stat
           label={`Slashed, last ${SLASH_WINDOW_ERAS} eras`}
-          value={String(overview.slashedLastWindow)}
+          value={
+            overview.stakingTracked === false ? (
+              <NotTracked />
+            ) : (
+              String(overview.slashedLastWindow)
+            )
+          }
           valueClass="text-grade-f"
         />
         <Stat
           label="Median commission"
-          value={formatPercent(overview.medianCommissionPercent, 1)}
+          value={
+            overview.stakingTracked === false ? (
+              <NotTracked />
+            ) : (
+              formatPercent(overview.medianCommissionPercent, 1)
+            )
+          }
         />
       </div>
 
@@ -220,18 +232,18 @@ export function Leaderboard({
                       <dd
                         className={`font-mono ${validator.commissionPercent > 10 ? "neg" : ""}`}
                       >
-                        {formatPercent(validator.commissionPercent)}
+                        {validator.stakingTracked === false ? <NotTracked /> : formatPercent(validator.commissionPercent)}
                       </dd>
                     </div>
                     <div>
                       <dt className="text-muted">Slashes</dt>
                       <dd className={`font-mono ${validator.slashes > 0 ? "neg" : ""}`}>
-                        {validator.slashes}
+                        {validator.stakingTracked === false ? <NotTracked /> : validator.slashes}
                       </dd>
                     </div>
                     <div>
                       <dt className="text-muted">Chills</dt>
-                      <dd className="font-mono">{validator.chills}</dd>
+                      <dd className="font-mono">{validator.stakingTracked === false ? <NotTracked /> : validator.chills}</dd>
                     </div>
                   </dl>
                   <Link
@@ -292,12 +304,12 @@ export function Leaderboard({
                     <td
                       className={`font-mono ${validator.commissionPercent > 10 ? "neg" : ""}`}
                     >
-                      {formatPercent(validator.commissionPercent)}
+                      {validator.stakingTracked === false ? <NotTracked /> : formatPercent(validator.commissionPercent)}
                     </td>
                     <td className={`font-mono ${validator.slashes > 0 ? "neg" : ""}`}>
-                      {validator.slashes}
+                      {validator.stakingTracked === false ? <NotTracked /> : validator.slashes}
                     </td>
-                    <td className="font-mono">{validator.chills}</td>
+                    <td className="font-mono">{validator.stakingTracked === false ? <NotTracked /> : validator.chills}</td>
                     <td>
                       <Sparkline
                         values={validator.eraPoints}
@@ -333,7 +345,7 @@ function Stat({
   valueClass = "",
 }: {
   label: string;
-  value: string;
+  value: ReactNode;
   valueClass?: string;
 }) {
   return (

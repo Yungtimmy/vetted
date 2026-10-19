@@ -71,6 +71,11 @@ export interface Validator {
   scoreTx: string | null;
   /** Where this row's history comes from. */
   source: ValidatorSource;
+  /**
+   * False when commission, slashes, chills, and rewards are not read from
+   * the chain yet. Screens show "Not tracked yet" instead of zeros.
+   */
+  stakingTracked?: boolean;
 }
 
 export interface NetworkOverview {
@@ -80,6 +85,8 @@ export interface NetworkOverview {
   gradedA: number;
   slashedLastWindow: number;
   medianCommissionPercent: number;
+  /** False when slash and commission totals are not read from the chain yet. */
+  stakingTracked?: boolean;
 }
 
 /**

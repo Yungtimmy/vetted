@@ -43,6 +43,7 @@ function toValidator(score: PublishedScore): Validator {
     history: [],
     scoreTx: score.txHash,
     source: "mainnet-history",
+    stakingTracked: false,
   };
 }
 
@@ -65,6 +66,7 @@ export const liveProvider: ValidatorDataProvider = {
       gradedA: scored.filter((validator) => validator.grade === "A").length,
       slashedLastWindow: 0,
       medianCommissionPercent: 0,
+      stakingTracked: false,
     };
   },
   listValidators: loadValidators,

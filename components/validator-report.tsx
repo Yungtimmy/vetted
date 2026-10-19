@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { NotTracked } from "@/components/data-states";
 import { GradeSeal, gradeColor } from "@/components/grade-badge";
 import { RewardsChart } from "@/components/rewards-chart";
 import { SourceBadge } from "@/components/source-badge";
@@ -133,7 +134,11 @@ function ScoredReport({
 
         <section className="card">
           <h3 className="mb-1.5">History</h3>
-          {validator.history.length === 0 ? (
+          {validator.stakingTracked === false ? (
+            <p className="py-3 text-sm text-muted">
+              <NotTracked />
+            </p>
+          ) : validator.history.length === 0 ? (
             <p className="py-3 text-sm text-muted">
               No slashes, chills, or commission changes in this window.
             </p>
@@ -167,7 +172,13 @@ function ScoredReport({
             {marked ? " · red marks the slash" : ""}
           </span>
         </div>
-        <RewardsChart rewards={validator.rewards} />
+        {validator.stakingTracked === false ? (
+          <p className="py-3 text-sm text-muted">
+            <NotTracked />
+          </p>
+        ) : (
+          <RewardsChart rewards={validator.rewards} />
+        )}
       </section>
     </>
   );
@@ -191,16 +202,24 @@ function NewReport({ validator }: { validator: Validator }) {
         <h3 className="mb-2">What we know so far</h3>
         <div className="fx">
           <span>Slashes</span>
-          <span className="font-mono">{validator.slashes}</span>
+          <span className="font-mono">
+            {validator.stakingTracked === false ? <NotTracked /> : validator.slashes}
+          </span>
         </div>
         <div className="fx">
           <span>Chills</span>
-          <span className="font-mono">{validator.chills}</span>
+          <span className="font-mono">
+            {validator.stakingTracked === false ? <NotTracked /> : validator.chills}
+          </span>
         </div>
         <div className="fx">
           <span>Commission</span>
           <span className="font-mono">
-            {validator.commissionPercent}%, unchanged
+            {validator.stakingTracked === false ? (
+              <NotTracked />
+            ) : (
+              `${validator.commissionPercent}%, unchanged`
+            )}
           </span>
         </div>
         <div className="fx">
