@@ -34,12 +34,21 @@ export function Leaderboard({
   const [showNew, setShowNew] = useState(true);
   const [sort, setSort] = useState<SortKey>("score");
 
+  const commissionTracked =
+    overview?.stakingTracked !== false &&
+    validators.every((validator) => validator.stakingTracked !== false);
+
   const rows = useMemo(() => {
     const needle = query.trim().toLowerCase();
     return validators
       .filter((validator) => {
         if (grade !== "all" && validator.grade !== grade) return false;
-        if (lowCommission && validator.commissionPercent > 10) return false;
+        if (
+          lowCommission &&
+          validator.stakingTracked !== false &&
+          validator.commissionPercent > 10
+        )
+          return false;
         if (activeOnly && !validator.active) return false;
         if (!showNew && validator.grade === "NEW") return false;
         if (!needle) return true;
@@ -149,11 +158,18 @@ export function Leaderboard({
             </select>
           </label>
           <FilterButton
-            pressed={lowCommission}
+            pressed={lowCommission && commissionTracked}
+            disabled={!commissionTracked}
+            describedBy={commissionTracked ? undefined : "commission-note"}
             onClick={() => setLowCommission((value) => !value)}
           >
             Commission ≤ 10%
           </FilterButton>
+          {commissionTracked ? null : (
+            <span id="commission-note" className="text-xs text-muted">
+              Needs staking data
+            </span>
+          )}
           <FilterButton
             pressed={activeOnly}
             onClick={() => setActiveOnly((value) => !value)}
@@ -360,10 +376,14 @@ function Stat({
 
 function FilterButton({
   pressed,
+  disabled = false,
+  describedBy,
   onClick,
   children,
 }: {
   pressed: boolean;
+  disabled?: boolean;
+  describedBy?: string;
   onClick: () => void;
   children: string;
 }) {
@@ -372,6 +392,8 @@ function FilterButton({
       type="button"
       className="chip"
       aria-pressed={pressed}
+      disabled={disabled}
+      aria-describedby={describedBy}
       onClick={onClick}
     >
       {children}
