@@ -29,23 +29,29 @@ async function HomeContent({
   searchParams: Promise<{ state?: string | string[] }>;
 }) {
   const state = readPreviewState((await searchParams).state);
-  const data = getDataProvider();
-  const overview = data.getOverview();
-
   if (state === "loading") {
     return <Leaderboard status="loading" overview={null} validators={[]} />;
   }
   if (state === "error") {
     return <Leaderboard status="error" overview={null} validators={[]} />;
   }
-  if (state === "empty") {
+
+  const data = getDataProvider();
+  let overview;
+  let validators;
+  try {
+    [overview, validators] = await Promise.all([
+      data.getOverview(),
+      data.listValidators(),
+    ]);
+  } catch {
+    return <Leaderboard status="error" overview={null} validators={[]} />;
+  }
+
+  if (state === "empty" || validators.length === 0) {
     return <Leaderboard status="empty" overview={overview} validators={[]} />;
   }
   return (
-    <Leaderboard
-      status="ready"
-      overview={overview}
-      validators={data.listValidators()}
-    />
+    <Leaderboard status="ready" overview={overview} validators={validators} />
   );
 }

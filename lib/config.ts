@@ -127,14 +127,40 @@ export const SUBSTRATE_RPC_URL = envString(
   process.env.NEXT_PUBLIC_SUBSTRATE_RPC_URL,
 );
 
-export const EVM_RPC_URL = envString(process.env.NEXT_PUBLIC_EVM_RPC_URL);
+/** Confirmed V3 testnet EVM JSON-RPC. Used when NEXT_PUBLIC_EVM_RPC_URL is unset. */
+const FALLBACK_EVM_RPC_URL = "https://test-evm-rpc-v3.portaldot.dev";
+
+export const EVM_RPC_URL =
+  envString(process.env.NEXT_PUBLIC_EVM_RPC_URL) || FALLBACK_EVM_RPC_URL;
+
+/** ScoreRegistry on the V3 testnet. Used when NEXT_PUBLIC_SCORE_REGISTRY_ADDRESS is unset. */
+const FALLBACK_SCORE_REGISTRY_ADDRESS =
+  "0xeebc363c7af7ed8e888da07e959043517ae4b97d";
+
+export const SCORE_REGISTRY_ADDRESS = (
+  envString(process.env.NEXT_PUBLIC_SCORE_REGISTRY_ADDRESS) ||
+  FALLBACK_SCORE_REGISTRY_ADDRESS
+).toLowerCase();
+
+/** Block the registry was deployed in. Log reads start here. */
+const FALLBACK_SCORE_REGISTRY_FROM_BLOCK = 107303;
+
+export const SCORE_REGISTRY_FROM_BLOCK =
+  envInt(process.env.NEXT_PUBLIC_SCORE_REGISTRY_FROM_BLOCK) ??
+  FALLBACK_SCORE_REGISTRY_FROM_BLOCK;
+
+/**
+ * "live" reads ScorePublished logs from the registry. "mock" keeps the
+ * sample validators for design work.
+ */
+export const DATA_SOURCE: "live" | "mock" =
+  envString(process.env.NEXT_PUBLIC_DATA_SOURCE) === "mock" ? "mock" : "live";
+
+/** The EVM RPC rejects requests without a User-Agent. */
+export const RPC_USER_AGENT = "vetted/0.1 (+https://github.com/Yungtimmy/vetted)";
 
 /** Explorer origin, no trailing slash. Empty until a deployment sets it. */
 export const EXPLORER_URL = envString(process.env.NEXT_PUBLIC_EXPLORER_URL);
 
-/**
- * True when a Substrate or EVM URL is set. The screens still render the
- * mock provider until that client is wired up.
- */
-export const RPC_CONFIGURED =
-  SUBSTRATE_RPC_URL.length > 0 || EVM_RPC_URL.length > 0;
+/** True when scores come from the chain rather than the sample set. */
+export const RPC_CONFIGURED = DATA_SOURCE === "live";

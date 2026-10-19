@@ -47,6 +47,8 @@ export interface Validator {
   grade: Grade;
   /** Null until the validator has MIN_ERAS_TO_SCORE eras of history. */
   score: number | null;
+  /** Era the latest score was published for, when known. */
+  scoreEra?: number;
   commissionPercent: number;
   /** Slashes inside the slash window. */
   slashes: number;
@@ -86,7 +88,7 @@ export interface NetworkOverview {
  * this later without changing the screens.
  */
 export interface ValidatorDataProvider {
-  getOverview(): NetworkOverview;
-  listValidators(): Validator[];
-  getValidator(id: string): Validator | undefined;
+  getOverview(): Promise<NetworkOverview>;
+  listValidators(): Promise<Validator[]>;
+  getValidator(id: string): Promise<Validator | undefined>;
 }

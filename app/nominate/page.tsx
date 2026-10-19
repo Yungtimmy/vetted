@@ -16,33 +16,37 @@ export default function NominatePage({
 }: {
   searchParams: Promise<{ add?: string | string[]; state?: string | string[] }>;
 }) {
-  const data = getDataProvider();
   return (
     <Suspense fallback={<NominateSkeleton />}>
-      <NominateFromQuery
-        searchParams={searchParams}
-        validators={data.listValidators()}
-        era={data.getOverview().era}
-      />
+      <NominateFromQuery searchParams={searchParams} />
     </Suspense>
   );
 }
 
 async function NominateFromQuery({
   searchParams,
-  validators,
-  era,
 }: {
   searchParams: Promise<{ add?: string | string[]; state?: string | string[] }>;
-  validators: Validator[];
-  era: number;
 }) {
   const params = await searchParams;
-  const state = readPreviewState(params.state);
+  const data = getDataProvider();
+  let validators: Validator[] = [];
+  let era = 0;
+  let failed = false;
+  try {
+    [validators, { era }] = await Promise.all([
+      data.listValidators(),
+      data.getOverview(),
+    ]);
+  } catch {
+    failed = true;
+  }
+  const state = failed ? "error" : readPreviewState(params.state);
   const add = params.add;
   const requested = typeof add === "string" ? add : null;
   const addId = previewAddId(state, requested);
-  const status = nominateStatus(state);
+  const status =
+    state !== "error" && validators.length === 0 ? "empty" : nominateStatus(state);
   return (
     <NominateFlow
       key={`${addId ?? "default"}-${status}`}
