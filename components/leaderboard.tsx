@@ -8,7 +8,7 @@ import { LeaderboardSkeleton } from "@/components/skeletons";
 import { SourceBadge } from "@/components/source-badge";
 import { Sparkline } from "@/components/sparkline";
 import { ERA_POINTS_WINDOW, MIN_ERAS_TO_SCORE, SLASH_WINDOW_ERAS } from "@/lib/config";
-import { erasRecorded, formatEra, formatPercent, shortSs58 } from "@/lib/format";
+import { erasRecorded, formatEra, formatPercent, shortHex, shortSs58 } from "@/lib/format";
 import type { Grade, NetworkOverview, Validator } from "@/lib/types";
 
 type BoardStatus = "ready" | "loading" | "empty" | "error";
@@ -201,6 +201,11 @@ export function Leaderboard({
                       </div>
                       <div className="truncate font-mono text-xs text-muted">
                         {shortSs58(validator.ss58)}
+                        {validator.scoreTx ? (
+                          <span title={validator.scoreTx}>
+                            {` · tx ${shortHex(validator.scoreTx)}`}
+                          </span>
+                        ) : null}
                       </div>
                     </div>
                     <Sparkline
@@ -277,6 +282,11 @@ export function Leaderboard({
                       </div>
                       <div className="font-mono text-xs text-muted">
                         {shortSs58(validator.ss58)}
+                        {validator.scoreTx ? (
+                          <span title={validator.scoreTx}>
+                            {` · tx ${shortHex(validator.scoreTx)}`}
+                          </span>
+                        ) : null}
                       </div>
                     </td>
                     <td
