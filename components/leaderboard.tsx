@@ -2,12 +2,16 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { LoadNote } from "@/components/data-states";
 import { GradeBadge, gradeColor } from "@/components/grade-badge";
+import { LeaderboardSkeleton } from "@/components/skeletons";
 import { SourceBadge } from "@/components/source-badge";
 import { Sparkline } from "@/components/sparkline";
-import { ERA_POINTS_WINDOW, SLASH_WINDOW_ERAS } from "@/lib/config";
-import { formatPercent, shortSs58 } from "@/lib/format";
+import { ERA_POINTS_WINDOW, MIN_ERAS_TO_SCORE, SLASH_WINDOW_ERAS } from "@/lib/config";
+import { erasRecorded, formatEra, formatPercent, shortSs58 } from "@/lib/format";
 import type { Grade, NetworkOverview, Validator } from "@/lib/types";
+
+type BoardStatus = "ready" | "loading" | "empty" | "error";
 
 type GradeFilter = "all" | Grade;
 type SortKey = "score" | "commission" | "slashes" | "name";
@@ -15,10 +19,12 @@ type SortKey = "score" | "commission" | "slashes" | "name";
 const GRADES: Grade[] = ["A", "B", "C", "D", "F", "NEW"];
 
 export function Leaderboard({
+  status,
   overview,
   validators,
 }: {
-  overview: NetworkOverview;
+  status: BoardStatus;
+  overview: NetworkOverview | null;
   validators: Validator[];
 }) {
   const [query, setQuery] = useState("");
@@ -43,6 +49,8 @@ export function Leaderboard({
       .sort((a, b) => compareValidators(a, b, sort));
   }, [validators, query, grade, lowCommission, activeOnly, showNew, sort]);
 
+  if (status === "loading") return <LeaderboardSkeleton />;
+
   return (
     <div>
       <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -52,12 +60,37 @@ export function Leaderboard({
             Know who you&apos;re staking with. Scores published on-chain every
             era.
           </p>
+          {overview && status !== "error" ? (
+            <p className="mt-1 text-xs text-muted">
+              Data as of era {formatEra(overview.era)}
+            </p>
+          ) : null}
         </div>
-        <Link href="/nominate" className="btn self-start">
-          Nominate safely
-        </Link>
+        {status === "ready" ? (
+          <Link href="/nominate" className="btn self-start">
+            Nominate safely
+          </Link>
+        ) : null}
       </div>
 
+      {status === "error" ? (
+        <LoadNote
+          message="Scores could not be loaded."
+          action="Retry"
+          actionHref="/"
+        />
+      ) : null}
+
+      {status === "empty" ? (
+        <LoadNote
+          message="No validators returned."
+          action="Retry"
+          actionHref="/"
+        />
+      ) : null}
+
+      {status === "ready" && overview ? (
+        <>
       <div className="mb-[18px] grid grid-cols-2 gap-3 xl:grid-cols-4">
         <Stat label="Validators scored" value={String(overview.validatorsScored)} />
         <Stat
@@ -152,6 +185,11 @@ export function Leaderboard({
                     <div className="min-w-0">
                       <div className="mb-2 text-xs text-muted">#{index + 1}</div>
                       <GradeBadge grade={validator.grade} score={validator.score} />
+                      {validator.score == null ? (
+                        <p className="mt-1 text-xs text-muted">
+                          {erasRecorded(validator.activeEras, MIN_ERAS_TO_SCORE)}
+                        </p>
+                      ) : null}
                       <Link
                         href={`/validator/${validator.id}`}
                         className="mt-2 block font-medium text-fg hover:underline"
@@ -221,6 +259,11 @@ export function Leaderboard({
                     <td className="text-xs text-muted">{index + 1}</td>
                     <td>
                       <GradeBadge grade={validator.grade} score={validator.score} />
+                      {validator.score == null ? (
+                        <div className="mt-1 max-w-28 text-xs text-muted">
+                          {erasRecorded(validator.activeEras, MIN_ERAS_TO_SCORE)}
+                        </div>
+                      ) : null}
                     </td>
                     <td>
                       <div className="flex flex-wrap items-center gap-2">
@@ -268,6 +311,8 @@ export function Leaderboard({
           </>
         )}
       </div>
+        </>
+      ) : null}
     </div>
   );
 }

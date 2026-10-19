@@ -28,6 +28,23 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+In `npm run dev`, `?state=` previews the screens the live provider will need. A production build ignores the query.
+
+| URL | State |
+| --- | --- |
+| `/` | Data as of the current era, on the overview |
+| `/?state=loading` | Leaderboard row skeletons |
+| `/?state=empty` | No validators returned, with Retry |
+| `/?state=error` | Scores could not be loaded, with Retry |
+| `/validator/lagos-validator?state=loading` | Report skeletons: score, sparkline, factors, history, rewards |
+| `/validator/lagos-validator?state=error` | This report could not be loaded |
+| `/validator/not-a-validator` | No validator with that id |
+| `/validator/harmattan-node` | Not enough history, eras recorded versus 28 |
+| `/nominate?state=loading` | Nomination skeletons |
+| `/nominate?state=empty` | No validators returned |
+| `/nominate?state=error` | The nomination list could not be loaded |
+| `/nominate?state=history` | A NEW validator is in the set and left out of the set score |
+
 | Script | |
 | --- | --- |
 | `npm run dev` | Local dev server |

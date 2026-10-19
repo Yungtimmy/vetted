@@ -4,6 +4,11 @@ export function formatEra(era: number): string {
   return era.toLocaleString("en-US");
 }
 
+/** "12 of 28 eras recorded" */
+export function erasRecorded(collected: number, needed: number): string {
+  return `${collected} of ${needed} eras recorded`;
+}
+
 export function formatToken(amount: number, digits = 0): string {
   return amount.toLocaleString("en-US", {
     minimumFractionDigits: digits,
