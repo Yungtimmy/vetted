@@ -8,7 +8,7 @@ export type ValidatorSource = "mainnet-history" | "testnet-live";
 
 export const VALIDATOR_SOURCE_LABEL: Record<ValidatorSource, string> = {
   "mainnet-history": "Mainnet history",
-  "testnet-live": "Testnet live",
+  "testnet-live": "Testnet",
 };
 
 export type HistoryKind = "COMMISSION" | "CHILL" | "SLASH";
