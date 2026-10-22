@@ -18,10 +18,9 @@ export default function MethodologyPage() {
       <p className="mt-2 text-sm text-muted">
         A score is a report card, not a promise of future rewards. Vetted
         publishes one number per validator, every era, so a nominator can see
-        the risk before they bond. On this testnet those scores are built from
-        mainnet history and published on the contract. The two validators
-        actually running here are tagged Testnet live and shown beside that
-        history.
+        the risk before they bond. Each score is built from the validator's
+        on-chain history on Portaldot testnet and published to the
+        ScoreRegistry contract. The site reads it back from there.
       </p>
 
       <h2 className="mt-8 text-lg">What goes into the score</h2>
