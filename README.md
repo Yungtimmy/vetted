@@ -12,7 +12,7 @@ Each era, Vetted scores a validator from 0 to 100 and publishes that score on-ch
 
 | Route | What it shows |
 | --- | --- |
-| `/` | Leaderboard. Stat cards, grade, 0–100 score, era-point sparkline, slashes, commission, and a source badge (Mainnet history or Testnet live). Search, filter, and sort. Cards replace the table on narrow screens. |
+| `/` | Leaderboard. Stat cards, grade, 0–100 score, era-point sparkline, slashes, commission, and a source badge (Mainnet history or Testnet; scores read from the testnet contract show Testnet). Search, filter, and sort. Cards replace the table on narrow screens. |
 | `/validator/[id]` | Report card. Scored validators get a point-by-point breakdown, history, and a rewards chart. Validators with fewer than 28 eras get the "Not enough history" state and are never graded F for being new. The same source badge sits next to the name. |
 | `/nominate` | Card grid plus a sticky "Your set" panel. The nomination cap stays 16. The staking pallet does not publish MaxNominations, so `NOMINATION_CAP` in `lib/config.ts` stays that placeholder. Review and the wallet step are mocked. |
 | `/methodology` | How the score is explained. |
@@ -87,7 +87,7 @@ Leave the React screens alone. Implement `ValidatorDataProvider` and return it f
 7. **Indexer events.** Decode the pallet events in `lib/chain-events.ts` (Staking slashes, chills, kicks, rewards, era payouts, and preference changes; `Session.ValidatorDisabled`; `Offences.Offence`).
 8. **Signing.** "Sign in your wallet" does not submit an extrinsic. Wire a wallet, then call the staking nominate extrinsic with the selected set and the bond amount. The mock success tx is `MOCK_NOMINATION_TX` in `lib/config.ts`.
 
-Copy `.env.example` to `.env.local` to point at the official endpoints. With both RPC URLs empty, every page shows the banner "Testnet not connected — showing sample data". Set either URL and the banner goes away. The tables still use the mock provider until the client is implemented. Two sample rows are tagged Testnet live (Ibadan Infra and Harmattan Node). The rest are Mainnet history.
+Copy `.env.example` to `.env.local` to point at the official endpoints. With both RPC URLs empty, every page shows the banner "Testnet not connected — showing sample data". Set either URL and the banner goes away. The tables still use the mock provider until the client is implemented. Two sample rows are tagged Testnet (Ibadan Infra and Harmattan Node). The rest are Mainnet history.
 
 ## Not in this scaffold
 

@@ -27,10 +27,10 @@ export function formatReward(value: number): string {
   });
 }
 
-/** "5GrwvaEF…utQY" */
+/** "5Grwv…utQY" */
 export function shortSs58(value: string): string {
   if (value.length <= 13) return value;
-  return `${value.slice(0, 8)}…${value.slice(-4)}`;
+  return `${value.slice(0, 5)}…${value.slice(-4)}`;
 }
 
 /** "0x8f2a…41c0" */

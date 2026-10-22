@@ -273,6 +273,8 @@ export function Leaderboard({
             )}
           </div>
 
+          <p className="mt-2.5 text-[12px] text-muted">Showing every active validator on Portaldot testnet.</p>
+
           <div className="mt-3.5 flex flex-col gap-2 rounded-lg border border-line bg-panel px-[18px] py-[13px] text-muted sm:flex-row sm:items-center sm:justify-between">
             <span>
               Scores are published on-chain every era to{" "}
@@ -317,28 +319,63 @@ function Untracked() {
 }
 
 function ValidatorCell({ validator }: { validator: Validator }) {
+  const named = validator.hasIdentity !== false;
   return (
-    <Link href={`/validator/${validator.id}`} className="flex min-w-0 items-center gap-[11px] text-fg">
-      <span
+    <div className="flex min-w-0 items-center gap-[11px] text-fg">
+      <Link
+        href={`/validator/${validator.id}`}
         className="grid h-[30px] w-[30px] shrink-0 place-items-center rounded-full text-[13px] font-bold"
         style={{ background: avatarColor(validator.name) }}
         aria-hidden
+        tabIndex={-1}
       >
-        {validator.name.trim().charAt(0).toUpperCase() || "?"}
-      </span>
+        {named ? validator.name.trim().charAt(0).toUpperCase() || "?" : validator.ss58.charAt(0)}
+      </Link>
       <span className="min-w-0">
         <span className="flex flex-wrap items-center gap-2">
-          <b className="text-[13.5px] font-semibold hover:underline">{validator.name}</b>
+          <Link href={`/validator/${validator.id}`} className="text-fg">
+            {named ? (
+              <b className="text-[13.5px] font-semibold hover:underline">{validator.name}</b>
+            ) : (
+              <b className="font-mono text-[13.5px] font-semibold hover:underline" title={validator.ss58}>
+                {shortSs58(validator.ss58)}
+              </b>
+            )}
+          </Link>
+          {named ? null : <CopyButton value={validator.ss58} />}
           <SourceBadge source={validator.source} />
         </span>
         <small className="block truncate font-mono text-[11.5px] text-dim">
-          {shortSs58(validator.ss58)}
+          {named ? shortSs58(validator.ss58) : null}
           {validator.scoreTx ? (
-            <span title={validator.scoreTx}>{` · tx ${shortHex(validator.scoreTx)}`}</span>
+            <span title={validator.scoreTx}>{`${named ? " · " : ""}tx ${shortHex(validator.scoreTx)}`}</span>
           ) : null}
         </small>
       </span>
-    </Link>
+    </div>
+  );
+}
+
+function CopyButton({ value }: { value: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      type="button"
+      className="rounded border border-line px-1.5 py-px font-mono text-[10.5px] text-dim hover:text-fg"
+      aria-label={`Copy address ${value}`}
+      title="Copy full address"
+      onClick={async () => {
+        try {
+          await navigator.clipboard.writeText(value);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1200);
+        } catch {
+          /* clipboard unavailable */
+        }
+      }}
+    >
+      {copied ? "Copied" : "Copy"}
+    </button>
   );
 }
 
