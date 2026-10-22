@@ -1,20 +1,26 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #0b0e14;
-  --panel: #121722;
-  --panel-2: #171d2a;
-  --line: #232b3b;
-  --fg: #e6eaf2;
-  --muted: #8a94a8;
-  --teal: #2dd4bf;
-  --on-teal: #04201c;
-  --nav: #0d111a;
-  --grade-a: #22c55e;
-  --grade-b: #a3e635;
-  --grade-c: #facc15;
-  --grade-d: #fb923c;
-  --grade-f: #ef4444;
+  --bg: #0a1628;
+  --panel: #0e1b2e;
+  --panel-2: #14223a;
+  --line: #1a2a43;
+  --line-2: #24344f;
+  --row: #15233a;
+  --fg: #e8ecf4;
+  --muted: #93a0b8;
+  --dim: #7d8aa3;
+  --faint: #6b7890;
+  --nav-fg: #aeb8cc;
+  --teal: #5048f0;
+  --accent-soft: #8c86ff;
+  --on-teal: #e8ecf4;
+  --nav: #0a1628;
+  --grade-a: #3ddba8;
+  --grade-b: #a3e26b;
+  --grade-c: #f2c94c;
+  --grade-d: #f2994a;
+  --grade-f: #ef6b6b;
   --grade-new: #64748b;
   color-scheme: dark;
 }
@@ -29,15 +35,20 @@
   --color-teal: var(--teal);
   --color-on-teal: var(--on-teal);
   --color-nav: var(--nav);
+  --color-line-2: var(--line-2);
+  --color-dim: var(--dim);
+  --color-faint: var(--faint);
+  --color-nav-fg: var(--nav-fg);
+  --color-accent-soft: var(--accent-soft);
   --color-grade-a: var(--grade-a);
   --color-grade-b: var(--grade-b);
   --color-grade-c: var(--grade-c);
   --color-grade-d: var(--grade-d);
   --color-grade-f: var(--grade-f);
   --color-grade-new: var(--grade-new);
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-space), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-space), ui-sans-serif, sans-serif;
-  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
 html {
@@ -48,8 +59,8 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--fg);
-  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  font-size: 14px;
+  font-family: var(--font-space), ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px;
   line-height: 1.5;
 }
 
@@ -64,6 +75,7 @@ h3 {
 h1 {
   font-size: 28px;
   font-weight: 700;
+  letter-spacing: -0.6px;
   line-height: 1.2;
 }
 
@@ -89,12 +101,12 @@ h3 {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border: 0;
-  border-radius: 8px;
+  border: 1px solid var(--teal);
+  border-radius: 6px;
   background: var(--teal);
   color: var(--on-teal);
-  padding: 9px 16px;
-  font-size: 14px;
+  padding: 8px 14px;
+  font-size: 12.5px;
   font-weight: 600;
   line-height: 1.25;
   text-decoration: none;
@@ -102,7 +114,7 @@ h3 {
 }
 
 .btn:hover {
-  filter: brightness(1.06);
+  background: #5d55f2;
 }
 
 .btn:disabled {
@@ -112,14 +124,14 @@ h3 {
 }
 
 .btn-ghost {
-  border: 1px solid var(--line);
-  background: transparent;
+  border: 1px solid var(--line-2);
+  background: var(--panel-2);
   color: var(--fg);
 }
 
 .btn-ghost:hover {
   border-color: var(--muted);
-  filter: none;
+  background: var(--panel-2);
 }
 
 .btn-block {
@@ -129,36 +141,35 @@ h3 {
 
 .card {
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: 8px;
   background: var(--panel);
-  padding: 16px;
+  padding: 18px;
 }
 
 .k {
   color: var(--muted);
   font-size: 12px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-weight: 600;
 }
 
 .chip {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  border: 1px solid var(--line);
-  border-radius: 99px;
+  border: 1px solid transparent;
+  border-radius: 6px;
   background: transparent;
-  color: var(--muted);
-  padding: 4px 10px;
-  font-size: 11px;
+  color: var(--nav-fg);
+  padding: 6px 11px;
+  font-size: 12px;
   line-height: 1.4;
   cursor: pointer;
 }
 
 .chip[aria-pressed="true"],
 .chip[data-active="true"] {
-  border-color: var(--teal);
-  color: var(--teal);
+  background: var(--teal);
+  color: var(--fg);
 }
 
 .chip select {
@@ -173,12 +184,12 @@ h3 {
 .search {
   width: 100%;
   min-width: 12rem;
-  border: 1px solid var(--line);
-  border-radius: 99px;
+  border: 1px solid var(--line-2);
+  border-radius: 6px;
   background: transparent;
   color: var(--fg);
-  padding: 5px 12px;
-  font-size: 12px;
+  padding: 7px 12px;
+  font-size: 13px;
 }
 
 .search::placeholder {
@@ -187,7 +198,7 @@ h3 {
 
 @media (min-width: 640px) {
   .search {
-    width: 16rem;
+    width: 240px;
   }
 }
 
@@ -227,7 +238,7 @@ h3 {
 }
 
 .link {
-  color: var(--teal);
+  color: var(--accent-soft);
   text-decoration: none;
 }
 
@@ -247,17 +258,17 @@ table.data {
 
 table.data th {
   border-bottom: 1px solid var(--line);
-  padding: 10px;
+  padding: 10px 8px;
   color: var(--muted);
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   text-align: left;
   white-space: nowrap;
 }
 
 table.data td {
-  border-bottom: 1px solid var(--line);
-  padding: 10px;
+  border-bottom: 1px solid var(--row);
+  padding: 11px 8px;
   vertical-align: middle;
 }
 
@@ -266,7 +277,7 @@ table.data tbody tr:last-child td {
 }
 
 table.data tbody tr:hover td {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--panel-2);
 }
 
 .grade-letter {
@@ -285,7 +296,7 @@ table.data tbody tr:hover td {
 
 .step[data-on="true"] {
   border-color: var(--teal);
-  color: var(--teal);
+  color: var(--accent-soft);
 }
 
 .tag {
@@ -322,4 +333,73 @@ table.data tbody tr:hover td {
 .chip:disabled {
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+.tabs {
+  display: flex;
+  gap: 22px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 22px;
+}
+
+.tabs a {
+  padding-bottom: 9px;
+  color: var(--dim);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+}
+
+.tabs a[aria-current="page"] {
+  color: var(--fg);
+  border-bottom-color: var(--teal);
+}
+
+.stat {
+  position: relative;
+  overflow: hidden;
+  height: 112px;
+}
+
+.stat-deco {
+  position: absolute;
+  right: 14px;
+  bottom: 12px;
+}
+
+.pct {
+  display: inline-block;
+  margin-left: 8px;
+  border: 1px solid #3ddba840;
+  border-radius: 4px;
+  background: #3ddba81a;
+  color: var(--grade-a);
+  padding: 2px 7px;
+  font-family: var(--font-space), ui-sans-serif, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0;
+  vertical-align: middle;
+}
+
+.sort-btn {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+
+.sort-btn i {
+  font-style: normal;
+  opacity: 0.5;
+  margin-left: 4px;
+}
+
+.sort-btn[data-on="true"] {
+  color: var(--fg);
+}
+
+.sort-btn[data-on="true"] i {
+  opacity: 1;
 }
