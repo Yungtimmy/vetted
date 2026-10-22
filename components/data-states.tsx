@@ -22,10 +22,10 @@ export function LoadNote({
 /** Stand-in for a figure the live provider does not read yet. */
 export function NotTracked() {
   return (
-    <span title="Coming next">
+    <span title="Not tracked yet">
       <span aria-hidden="true">—</span>{" "}
       <span className="font-sans text-xs font-normal text-muted">
-        Coming next
+        Not tracked yet
       </span>
     </span>
   );

@@ -315,7 +315,7 @@ const QUICK_FILTERS: { key: QuickFilter; label: string }[] = [
 ];
 
 function Untracked() {
-  return <span className="font-mono text-faint">Coming next</span>;
+  return <span className="font-mono text-faint">Not tracked yet</span>;
 }
 
 function ValidatorCell({ validator }: { validator: Validator }) {
