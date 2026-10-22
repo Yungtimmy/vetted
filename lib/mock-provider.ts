@@ -446,7 +446,7 @@ const overview: NetworkOverview = {
 };
 
 export const mockProvider: ValidatorDataProvider = {
-  getOverview: () => overview,
-  listValidators: () => validators,
-  getValidator: (id) => byId.get(id),
+  getOverview: async () => overview,
+  listValidators: async () => validators,
+  getValidator: async (id) => byId.get(id),
 };

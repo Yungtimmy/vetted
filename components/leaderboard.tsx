@@ -1,14 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import { LoadNote } from "@/components/data-states";
+import { useMemo, useState, type ReactNode } from "react";
+import { LoadNote, NotTracked } from "@/components/data-states";
 import { GradeBadge, gradeColor } from "@/components/grade-badge";
 import { LeaderboardSkeleton } from "@/components/skeletons";
 import { SourceBadge } from "@/components/source-badge";
 import { Sparkline } from "@/components/sparkline";
 import { ERA_POINTS_WINDOW, MIN_ERAS_TO_SCORE, SLASH_WINDOW_ERAS } from "@/lib/config";
-import { erasRecorded, formatEra, formatPercent, shortSs58 } from "@/lib/format";
+import { erasRecorded, formatEra, formatPercent, shortHex, shortSs58 } from "@/lib/format";
 import type { Grade, NetworkOverview, Validator } from "@/lib/types";
 
 type BoardStatus = "ready" | "loading" | "empty" | "error";
@@ -34,12 +34,21 @@ export function Leaderboard({
   const [showNew, setShowNew] = useState(true);
   const [sort, setSort] = useState<SortKey>("score");
 
+  const commissionTracked =
+    overview?.stakingTracked !== false &&
+    validators.every((validator) => validator.stakingTracked !== false);
+
   const rows = useMemo(() => {
     const needle = query.trim().toLowerCase();
     return validators
       .filter((validator) => {
         if (grade !== "all" && validator.grade !== grade) return false;
-        if (lowCommission && validator.commissionPercent > 10) return false;
+        if (
+          lowCommission &&
+          validator.stakingTracked !== false &&
+          validator.commissionPercent > 10
+        )
+          return false;
         if (activeOnly && !validator.active) return false;
         if (!showNew && validator.grade === "NEW") return false;
         if (!needle) return true;
@@ -100,12 +109,24 @@ export function Leaderboard({
         />
         <Stat
           label={`Slashed, last ${SLASH_WINDOW_ERAS} eras`}
-          value={String(overview.slashedLastWindow)}
+          value={
+            overview.stakingTracked === false ? (
+              <NotTracked />
+            ) : (
+              String(overview.slashedLastWindow)
+            )
+          }
           valueClass="text-grade-f"
         />
         <Stat
           label="Median commission"
-          value={formatPercent(overview.medianCommissionPercent, 1)}
+          value={
+            overview.stakingTracked === false ? (
+              <NotTracked />
+            ) : (
+              formatPercent(overview.medianCommissionPercent, 1)
+            )
+          }
         />
       </div>
 
@@ -137,11 +158,18 @@ export function Leaderboard({
             </select>
           </label>
           <FilterButton
-            pressed={lowCommission}
+            pressed={lowCommission && commissionTracked}
+            disabled={!commissionTracked}
+            describedBy={commissionTracked ? undefined : "commission-note"}
             onClick={() => setLowCommission((value) => !value)}
           >
             Commission ≤ 10%
           </FilterButton>
+          {commissionTracked ? null : (
+            <span id="commission-note" className="text-xs text-muted">
+              Needs staking data
+            </span>
+          )}
           <FilterButton
             pressed={activeOnly}
             onClick={() => setActiveOnly((value) => !value)}
@@ -201,6 +229,11 @@ export function Leaderboard({
                       </div>
                       <div className="truncate font-mono text-xs text-muted">
                         {shortSs58(validator.ss58)}
+                        {validator.scoreTx ? (
+                          <span title={validator.scoreTx}>
+                            {` · tx ${shortHex(validator.scoreTx)}`}
+                          </span>
+                        ) : null}
                       </div>
                     </div>
                     <Sparkline
@@ -215,18 +248,18 @@ export function Leaderboard({
                       <dd
                         className={`font-mono ${validator.commissionPercent > 10 ? "neg" : ""}`}
                       >
-                        {formatPercent(validator.commissionPercent)}
+                        {validator.stakingTracked === false ? <NotTracked /> : formatPercent(validator.commissionPercent)}
                       </dd>
                     </div>
                     <div>
                       <dt className="text-muted">Slashes</dt>
                       <dd className={`font-mono ${validator.slashes > 0 ? "neg" : ""}`}>
-                        {validator.slashes}
+                        {validator.stakingTracked === false ? <NotTracked /> : validator.slashes}
                       </dd>
                     </div>
                     <div>
                       <dt className="text-muted">Chills</dt>
-                      <dd className="font-mono">{validator.chills}</dd>
+                      <dd className="font-mono">{validator.stakingTracked === false ? <NotTracked /> : validator.chills}</dd>
                     </div>
                   </dl>
                   <Link
@@ -277,17 +310,22 @@ export function Leaderboard({
                       </div>
                       <div className="font-mono text-xs text-muted">
                         {shortSs58(validator.ss58)}
+                        {validator.scoreTx ? (
+                          <span title={validator.scoreTx}>
+                            {` · tx ${shortHex(validator.scoreTx)}`}
+                          </span>
+                        ) : null}
                       </div>
                     </td>
                     <td
                       className={`font-mono ${validator.commissionPercent > 10 ? "neg" : ""}`}
                     >
-                      {formatPercent(validator.commissionPercent)}
+                      {validator.stakingTracked === false ? <NotTracked /> : formatPercent(validator.commissionPercent)}
                     </td>
                     <td className={`font-mono ${validator.slashes > 0 ? "neg" : ""}`}>
-                      {validator.slashes}
+                      {validator.stakingTracked === false ? <NotTracked /> : validator.slashes}
                     </td>
-                    <td className="font-mono">{validator.chills}</td>
+                    <td className="font-mono">{validator.stakingTracked === false ? <NotTracked /> : validator.chills}</td>
                     <td>
                       <Sparkline
                         values={validator.eraPoints}
@@ -323,7 +361,7 @@ function Stat({
   valueClass = "",
 }: {
   label: string;
-  value: string;
+  value: ReactNode;
   valueClass?: string;
 }) {
   return (
@@ -338,10 +376,14 @@ function Stat({
 
 function FilterButton({
   pressed,
+  disabled = false,
+  describedBy,
   onClick,
   children,
 }: {
   pressed: boolean;
+  disabled?: boolean;
+  describedBy?: string;
   onClick: () => void;
   children: string;
 }) {
@@ -350,6 +392,8 @@ function FilterButton({
       type="button"
       className="chip"
       aria-pressed={pressed}
+      disabled={disabled}
+      aria-describedby={describedBy}
       onClick={onClick}
     >
       {children}

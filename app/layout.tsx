@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import { AppShell } from "@/components/app-shell";
-import { RPC_CONFIGURED } from "@/lib/config";
+import { CURRENT_ERA, NETWORK_NAME, RPC_CONFIGURED } from "@/lib/config";
 import { getDataProvider } from "@/lib/data";
 import "./globals.css";
 
@@ -36,8 +36,10 @@ export const metadata: Metadata = {
     "Validator risk report cards for the Portaldot network. Scores are published on-chain every era.",
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
-  const overview = getDataProvider().getOverview();
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const overview = await getDataProvider()
+    .getOverview()
+    .catch(() => ({ name: NETWORK_NAME, era: CURRENT_ERA }));
 
   return (
     <html

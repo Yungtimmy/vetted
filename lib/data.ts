@@ -1,27 +1,20 @@
+import { DATA_SOURCE } from "@/lib/config";
+import { liveProvider } from "@/lib/live-provider";
 import { mockProvider } from "@/lib/mock-provider";
 import type { ValidatorDataProvider } from "@/lib/types";
 
 /**
  * The only import pages should use to read validator data.
  *
- * Swap `mockProvider` for a live implementation of `ValidatorDataProvider`
- * when the chain is ready. Planned reads:
+ * Live (default): latest ScorePublished log per validator from the
+ * ScoreRegistry contract over the EVM RPC (`NEXT_PUBLIC_EVM_RPC_URL`,
+ * `NEXT_PUBLIC_SCORE_REGISTRY_ADDRESS`). Staking fields from the
+ * Substrate RPC are not read yet.
  *
- * - Substrate RPC (`NEXT_PUBLIC_SUBSTRATE_RPC_URL`): session and staking
- *   state, era points, chill and slash events, self-stake, commission.
- * - EVM RPC (`NEXT_PUBLIC_EVM_RPC_URL`) plus the score contract: the grade,
- *   the 0–100 score, the era it was published in, and the publishing tx.
- *
- * H160 account ids returned by the EVM side are Portaldot account ids,
- * not Ethereum addresses. Token symbol and decimals come from
- * NEXT_PUBLIC_TOKEN_SYMBOL and NEXT_PUBLIC_TOKEN_DECIMALS
- * (confirmed defaults tPOT and 14 when unset). Chain id and both RPC
- * URLs are env-driven the same way. Official endpoints are in
- * `.env.example`. Scores will be mainnet history published on the
- * testnet contract, with the testnet's live validators alongside.
+ * Set `NEXT_PUBLIC_DATA_SOURCE=mock` to use the sample validators.
  */
 export function getDataProvider(): ValidatorDataProvider {
-  return mockProvider;
+  return DATA_SOURCE === "mock" ? mockProvider : liveProvider;
 }
 
 export type {
