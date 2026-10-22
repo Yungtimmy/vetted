@@ -1,11 +1,12 @@
 import { CURRENT_ERA, MIN_ERAS_TO_SCORE, NETWORK_NAME } from "@/lib/config";
 import { fetchPublishedScores, latestByValidator, type PublishedScore } from "@/lib/score-registry";
+import { fetchActiveValidators, HIDDEN_VALIDATORS } from "@/lib/active-set";
 import { gradeForScore } from "@/lib/scoring";
+import { toSs58 } from "@/lib/ss58";
 import type { Grade, NetworkOverview, Validator, ValidatorDataProvider } from "@/lib/types";
 
 /** Dev accounts with known names. Others show their account id. */
 const KNOWN_NAMES: Record<string, string> = {
-  "0xd43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d": "Alice",
   "0x8eaf04151687736326c9fea17e25fc5287613693c912909cb226aa4794f26a48": "Bob",
 };
 
@@ -22,10 +23,13 @@ function toGrade(score: PublishedScore): Grade {
  * yet, so they stay at zero or empty.
  */
 function toValidator(score: PublishedScore): Validator {
+  const ss58 = toSs58(score.validator);
+  const knownName = KNOWN_NAMES[score.validator];
   return {
     id: score.validator,
-    name: KNOWN_NAMES[score.validator] ?? score.validator,
-    ss58: score.validator,
+    name: knownName ?? ss58,
+    hasIdentity: knownName != null,
+    ss58,
     h160: score.validator,
     grade: toGrade(score),
     score: score.score,
@@ -48,8 +52,11 @@ function toValidator(score: PublishedScore): Validator {
 }
 
 async function loadValidators(): Promise<Validator[]> {
-  const logs = await fetchPublishedScores();
-  return latestByValidator(logs)
+  const [logs, active] = await Promise.all([fetchPublishedScores(), fetchActiveValidators()]);
+  const shown = active
+    ? (key: string) => active.includes(key)
+    : (key: string) => !HIDDEN_VALIDATORS.has(key);
+  return latestByValidator(logs.filter((log) => shown(log.validator)))
     .map(toValidator)
     .sort((a, b) => (b.score ?? -1) - (a.score ?? -1));
 }

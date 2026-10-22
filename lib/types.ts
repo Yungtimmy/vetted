@@ -39,6 +39,8 @@ export interface Validator {
   name: string;
   /** SS58 account id. */
   ss58: string;
+  /** False when the name is just the address (no on-chain identity). */
+  hasIdentity?: boolean;
   /**
    * 20-byte Portaldot account id, 0x-prefixed hex.
    * This is not an Ethereum address.
