@@ -5,7 +5,7 @@ import {
 
 const STYLE: Record<ValidatorSource, { background: string; color: string }> = {
   "mainnet-history": { background: "var(--panel-2)", color: "var(--muted)" },
-  "testnet-live": { background: "#12352f", color: "var(--teal)" },
+  "testnet-live": { background: "#5048f01f", color: "var(--accent-soft)" },
 };
 
 export function SourceBadge({ source }: { source: ValidatorSource }) {

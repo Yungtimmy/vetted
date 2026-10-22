@@ -1,0 +1,62 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+:root{--bg:#0b0e14;--panel:#121722;--panel-2:#171d2a;--line:#232b3b;--fg:#e6eaf2;--muted:#8a94a8;--teal:#2dd4bf;--new:#64748b;--c:#facc15}
+html,body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,sans-serif;font-size:15px;line-height:1.45}
+.wrap{width:1600px;height:870px;position:relative;box-sizing:border-box;padding:56px 64px}
+h1{font-family:'Space Grotesk';font-size:34px;margin:0;letter-spacing:-.02em}
+.sub{color:var(--muted);margin-top:6px;font-size:16px}
+.zone{position:absolute;border:1px solid var(--line);border-radius:14px;padding:22px 24px;box-sizing:border-box}
+.zl{font-family:'Space Grotesk';font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:12px}
+.box.k{border-color:var(--teal)}
+.box.p{background:transparent;border:1px dashed var(--new)}
+.t{font-family:'Space Grotesk';font-weight:700;font-size:17px}
+.d{color:var(--muted);font-size:13.5px;margin-top:3px}
+.m{font-family:'JetBrains Mono';font-size:12.5px;color:var(--teal)}
+.tag{display:inline-block;font-size:11px;font-weight:600;border-radius:4px;padding:1px 6px;margin-left:6px;vertical-align:2px}
+.tl{background:var(--teal);color:#04201c}.tp{border:1px solid var(--new);color:var(--muted)}.tm{border:1px solid var(--c);color:var(--c)}
+svg{position:absolute;left:0;top:0}
+.lab{font-family:Inter;font-size:13px;fill:var(--muted)}
+.key{position:absolute;left:64px;top:800px;color:var(--muted);font-size:13px}
+.key span{margin-right:28px}
+</style></head><body><div class="wrap">
+<h1>Vetted architecture</h1>
+<div class="sub">Validator risk report cards for Portaldot. Scores are published to a contract on Portaldot V3 testnet, and the app reads them back.</div>
+
+<div class="zone" style="left:64px;top:170px;width:440px;height:600px">
+ <div class="zl">Publisher · local scripts, not in repo</div>
+ <div class="box k"><div class="t">Publish script <span class="tag tl">live</span></div><div class="d">ethers.js signs a publish call to ScoreRegistry over EVM RPC. One score published so far (era 1285).</div><div class="m">tx 0xcf69a7c7…1b894</div></div>
+ <div class="box k"><div class="t">Deploy script <span class="tag tl">live</span></div><div class="d">@polkadot/api sends revive.instantiateWithCode over Substrate WebSocket.</div><div class="m">deploy tx 0x75a8f90a…b555</div></div>
+ <div class="box p"><div class="t">Era indexer + scoring job <span class="tag tp">planned</span></div><div class="d">Read Staking events per era (Slashed, Chilled, Rewarded, EraPaid…), score each validator, publish. Event list defined in lib/chain-events.ts.</div></div>
+ <div class="box p" style="margin-bottom:0"><div class="t">Scoring rules <span class="tag tp">planned input</span></div><div class="d">lib/scoring.ts grades A–F; validators need 28 eras before a grade.</div></div>
+</div>
+
+<div class="zone" style="left:580px;top:170px;width:440px;height:600px">
+ <div class="zl">Portaldot V3 testnet · chain 420420777</div>
+ <div class="box"><div class="t">EVM JSON-RPC</div><div class="m">https://test-evm-rpc-v3.portaldot.dev</div><div class="d">eth_getLogs and transactions</div></div>
+ <div class="box k" style="margin-top:28px"><div class="t">ScoreRegistry contract <span class="tag tl">live</span></div><div class="m">0xeebc363c7af7ed8e888da07e959043517ae4b97d</div><div class="d">Deployed at block 107303. Emits ScorePublished(validator, era, score, grade).</div></div>
+ <div class="box" style="margin-top:28px"><div class="t">Substrate node</div><div class="m">wss://test-node-v3.portaldot.dev</div><div class="d">Staking pallet, pallet-revive contracts</div></div>
+</div>
+
+<div class="zone" style="left:1096px;top:170px;width:440px;height:600px">
+ <div class="zl">Vetted app · Next.js 16 on Vercel</div>
+ <div class="box k"><div class="t">Live data provider <span class="tag tl">default</span></div><div class="d">lib/score-registry.ts fetches ScorePublished logs from block 107303, keeps the latest per validator. Cached for minutes.</div></div>
+ <div class="box"><div class="t">Mock data provider <span class="tag tm">mock</span></div><div class="d">Sample validators when NEXT_PUBLIC_DATA_SOURCE=mock</div></div>
+ <div class="box"><div class="t">Pages</div><div class="d">Leaderboard · Validator report card · Nominate · Methodology · Contract</div></div>
+ <div class="box p"><div class="t">Staking fields <span class="tag tp">planned</span></div><div class="d">Commission, stake, chills, slashes show “Not tracked yet”.</div></div>
+ <div class="box p" style="margin-bottom:0"><div class="t">Wallet + nominate <span class="tag tm">mock</span></div><div class="d">Signature and tx are placeholders, nothing broadcast.</div></div>
+</div>
+
+<svg width="1600" height="870"><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8a94a8"/></marker></defs>
+ <g stroke="#8a94a8" stroke-width="1.5" fill="none">
+  <path d="M480 280 H602" marker-end="url(#a)"/>
+  <path d="M480 410 H530 V530 H602" marker-end="url(#a)"/>
+  <path d="M602 560 H560 V560 H482" stroke-dasharray="5 5" marker-end="url(#a)"/>
+  <path d="M1020 280 H1118" marker-end="url(#a)"/>
+ </g>
+ <text class="lab" x="500" y="270">publish</text>
+ <text class="lab" x="488" y="400">deploy</text>
+ <text class="lab" x="540" y="584">era data</text>
+ <text class="lab" x="1032" y="270">read logs</text>
+</svg>
+<div class="key"><span style="color:#2dd4bf">Teal border: live on testnet</span><span>Dashed: planned</span><span style="color:#facc15">Yellow tag: mock</span></div>
+</div></body></html>

@@ -325,7 +325,7 @@ function ValidatorCard({
 
   return (
     <div
-      className={`card cursor-pointer ${selected ? "border-teal shadow-[inset_0_0_0_1px_var(--teal)]" : ""} ${risky ? "opacity-60" : ""}`}
+      className={`card cursor-pointer ${selected ? "border-teal" : ""} ${risky ? "opacity-60" : ""}`}
       onClick={onToggle}
     >
       <div className="flex items-start justify-between gap-3">
@@ -348,7 +348,7 @@ function ValidatorCard({
       <Link
         href={`/validator/${validator.id}`}
         onClick={(event) => event.stopPropagation()}
-        className="mt-2.5 block font-semibold text-fg hover:text-teal"
+        className="mt-2.5 block font-semibold text-fg hover:text-accent-soft"
       >
         {validator.name}
       </Link>
@@ -401,7 +401,7 @@ function SetPanel({
   onReview: () => void;
 }) {
   return (
-    <div className="card border-[#1f4d47] bg-[linear-gradient(180deg,#10201f,#121722)]">
+    <div className="card border-line-2 bg-panel-2">
       <p className="k">Your set</p>
       <div className="mt-1 mb-2.5 flex items-baseline gap-2">
         <span className="font-mono text-[34px] leading-none font-semibold">

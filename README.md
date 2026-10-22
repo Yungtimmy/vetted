@@ -4,11 +4,15 @@ Validator risk report cards for the Portaldot network. Built for Portaldot Hacke
 
 Each era, Vetted scores a validator from 0 to 100 and publishes that score on-chain. This app is the nominator-facing dashboard: a leaderboard, a per-validator report card, and a flow for building a safer nomination set. **The screens still use sample data.** Portaldot has published the V3 testnet: chain name PortaldotV3 Test, chain id 420420777, Substrate `wss://test-node-v3.portaldot.dev`, EVM `https://test-evm-rpc-v3.portaldot.dev`, explorer `https://node-console.portaldot.dev`. Scores will come from mainnet history and be published on the testnet contract. The testnet's two live validators are shown alongside those scores. Until `getDataProvider()` reads the chain, every number on screen comes from the mock provider.
 
+## Architecture
+
+![Architecture](docs/architecture.png)
+
 ## Screens
 
 | Route | What it shows |
 | --- | --- |
-| `/` | Leaderboard. Grade, 0–100 score, commission, slashes, chills, era-point sparkline, and a source badge (Mainnet history or Testnet live). Search, filter, and sort. Cards replace the table on narrow screens. |
+| `/` | Leaderboard. Stat cards, grade, 0–100 score, era-point sparkline, slashes, commission, and a source badge (Mainnet history or Testnet live). Search, filter, and sort. Cards replace the table on narrow screens. |
 | `/validator/[id]` | Report card. Scored validators get a point-by-point breakdown, history, and a rewards chart. Validators with fewer than 28 eras get the "Not enough history" state and are never graded F for being new. The same source badge sits next to the name. |
 | `/nominate` | Card grid plus a sticky "Your set" panel. The nomination cap stays 16. The staking pallet does not publish MaxNominations, so `NOMINATION_CAP` in `lib/config.ts` stays that placeholder. Review and the wallet step are mocked. |
 | `/methodology` | How the score is explained. |

@@ -26,10 +26,11 @@ export function GradeBadge({
   return (
     <span className="inline-flex items-center gap-2">
       <span
-        className="grade-letter grid h-[30px] w-[30px] place-items-center rounded-[7px] text-base leading-none"
+        className="grade-letter grid h-6 min-w-7 place-items-center rounded-[5px] border px-1 text-[13px] leading-none"
         style={{
-          background: COLOR[grade],
-          color: isNew ? "var(--fg)" : "var(--bg)",
+          color: COLOR[grade],
+          borderColor: `color-mix(in srgb, ${COLOR[grade]} 33%, transparent)`,
+          background: `color-mix(in srgb, ${COLOR[grade]} 8%, transparent)`,
           fontSize: isNew ? 10 : undefined,
         }}
       >
