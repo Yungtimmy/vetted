@@ -79,12 +79,13 @@ export default function MethodologyPage() {
       </p>
 
       <p className="mt-8 text-sm text-muted">
-        These pages read a mock provider. When the score contract is live, the
-        number on the card is the number stored on-chain for that era. See{" "}
+        Scores on these pages are read live from the ScoreRegistry contract on
+        Portaldot testnet. The number on each card is the number stored
+        on-chain for that era. See{" "}
         <Link href="/contract" className="link">
           API & contract
         </Link>{" "}
-        for the swap.
+        for the contract address.
       </p>
     </article>
   );
