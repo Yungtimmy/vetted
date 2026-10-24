@@ -2,11 +2,46 @@
 
 Validator risk report cards for the Portaldot network. Built for Portaldot Hacker House / DoraHacks, Node Ops & Tooling.
 
-Each era, Vetted scores a validator from 0 to 100 and publishes that score on-chain. This app is the nominator-facing dashboard: a leaderboard, a per-validator report card, and a flow for building a safer nomination set. **The screens still use sample data.** Portaldot has published the V3 testnet: chain name PortaldotV3 Test, chain id 420420777, Substrate `wss://test-node-v3.portaldot.dev`, EVM `https://test-evm-rpc-v3.portaldot.dev`, explorer `https://node-console.portaldot.dev`. Scores will come from mainnet history and be published on the testnet contract. The testnet's two live validators are shown alongside those scores. Until `getDataProvider()` reads the chain, every number on screen comes from the mock provider.
+Each era, Vetted scores a validator from 0 to 100 and publishes that score on-chain. This app is the nominator-facing dashboard: a leaderboard, a per-validator report card, and a flow for building a safer nomination set.
+
+- **Live site:** https://tryvetted.vercel.app
+- **Demo video:** https://youtu.be/PwV31kM66DI
+
+## Live on Portaldot V3 testnet
+
+Scores are read live from the `ScoreRegistry` contract on PortaldotV3 Test (chain id 420420777). The site pulls every `ScorePublished` log over the EVM RPC (`eth_getLogs`, cached for a minute) and shows the latest score per validator. Two validators are scored right now, the two in the testnet's active set.
+
+| | |
+| --- | --- |
+| Contract | `0xeebc363c7af7ed8e888da07e959043517ae4b97d` |
+| Deployed at block | 107303 |
+| EVM RPC | `https://test-evm-rpc-v3.portaldot.dev` |
+| Substrate RPC | `wss://test-node-v3.portaldot.dev` |
+| Explorer | `https://node-console.portaldot.dev` |
+
+Publish transactions (`ScorePublished` logs on the contract):
+
+| Block | Tx | Validator | Era | Score |
+| --- | --- | --- | --- | --- |
+| 144339 | `0x76a7bd7259f660c546c1532a46ba79d353e1df5121d11fbcc8838f836c969dcf` | `0x849a279f…` | 39 | 100 / A |
+| 144343 | `0xf197cb76814284676fb41ee3cad7e07452a309adab6f1a1616608d41de6e874d` | `0xd40a5b57…` | 39 | 100 / A |
+
+An earlier test publish for Alice's dev account (era 1285, block 107808, tx `0xcf69a7c7600b6c896460da472f4f2049d732a3fecbd344c074737b12ac9b1894`) is still on the contract. Alice is not a validator on this chain, so the site hides her (`lib/active-set.ts`).
+
+Not live yet: staking fields from the Substrate side (commission, slashes, chills, stake, era points) are not read, so they show as zero or empty. The wallet step in `/nominate` is still mocked and does not submit `staking.nominate`.
 
 ## Architecture
 
-![Architecture](docs/architecture.png)
+```mermaid
+flowchart LR
+  S["Scorer<br/>(off-chain, per era)"] -->|"publish(validator, era, score, grade)"| R["ScoreRegistry<br/>Portaldot V3 testnet<br/>0xeebc…b97d"]
+  R -->|"ScorePublished logs<br/>eth_getLogs via EVM RPC"| P["lib/score-registry.ts<br/>lib/live-provider.ts"]
+  N["Substrate RPC<br/>Session.Validators"] -->|"active set"| A["lib/active-set.ts"]
+  A --> P
+  P -->|"getDataProvider()"| W["Next.js site<br/>tryvetted.vercel.app"]
+```
+
+The scorer is not part of this repo; it writes scores with `publish`. The site only reads: `lib/score-registry.ts` decodes the logs, `lib/active-set.ts` reads the current session validators to filter out non-validators, and `lib/live-provider.ts` maps the latest score per validator into the screens.
 
 ## Screens
 
@@ -20,19 +55,19 @@ Each era, Vetted scores a validator from 0 to 100 and publishes that score on-ch
 
 ## Stack
 
-Next.js (App Router), TypeScript, Tailwind CSS. It deploys on the Vercel free tier: Node.js runtime, no Edge runtime, no paid platform features. `npm run build` prerenders the mock pages. Below the `xl` breakpoint the leaderboard switches from the table to cards so a phone does not scroll sideways.
+Next.js (App Router), TypeScript, Tailwind CSS. It deploys on the Vercel free tier: Node.js runtime, no Edge runtime, no paid platform features. Below the `xl` breakpoint the leaderboard switches from the table to cards so a phone does not scroll sideways.
 
 ## Setup
 
 ```bash
 npm install
-cp .env.example .env.local   # official endpoints; leave an RPC empty to keep the banner
+cp .env.example .env.local   # official endpoints; set NEXT_PUBLIC_DATA_SOURCE=mock for sample data
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
 
-In `npm run dev`, `?state=` previews the screens the live provider will need. A production build ignores the query.
+In `npm run dev`, `?state=` previews loading, empty, and error screens. A production build ignores the query.
 
 | URL | State |
 | --- | --- |
@@ -60,35 +95,26 @@ Fonts are loaded with `next/font`: Space Grotesk for headings, Inter for body te
 
 ## Data layer
 
-Pages do not import mock rows. They call `getDataProvider()` from `lib/data.ts`.
+Pages do not import data directly. They call `getDataProvider()` from `lib/data.ts`, which returns the live provider by default. Set `NEXT_PUBLIC_DATA_SOURCE=mock` to use the sample validators for design work; only then does the "Testnet not connected, showing sample data" banner appear.
 
 | File | Role |
 | --- | --- |
 | `lib/types.ts` | `Validator`, `NetworkOverview`, and `ValidatorDataProvider`. |
-| `lib/config.ts` | Env-driven chain id, RPCs, and token settings. SS58 prefix, era timing, and the nomination-cap placeholder. |
+| `lib/config.ts` | Env-driven chain id, RPCs, token, contract address and deploy block, with confirmed testnet defaults. |
+| `lib/score-registry.ts` | Reads and decodes `ScorePublished` logs from the contract. |
+| `lib/active-set.ts` | Reads `Session.Validators` over the Substrate RPC. |
+| `lib/live-provider.ts` | Default provider: latest on-chain score per active validator. |
+| `lib/mock-provider.ts` | Sample validators, used only with `NEXT_PUBLIC_DATA_SOURCE=mock`. |
 | `lib/chain-events.ts` | Pallet event names and field order for a future indexer. |
-| `lib/mock-provider.ts` | The nine sample validators and the network stats from the mockup. |
 | `lib/scoring.ts` | Grade bands, stake-weighted set score, nomination warnings. |
 | `lib/format.ts` | Address shortening, era and token formatting, explorer links. |
-| `lib/data.ts` | Returns the provider. This is the file to edit when going live. |
 
-The mock overview (142 scored, 38 graded A, 6 slashed, 5.0% median commission) is the network snapshot from the design. The table is a nine-validator sample, including Harmattan Node as NEW.
+## Chain notes
 
-## Swapping in the chain
+- Amounts use **tPOT** with **14 decimals** unless `NEXT_PUBLIC_TOKEN_SYMBOL` / `NEXT_PUBLIC_TOKEN_DECIMALS` are set.
+- SS58 prefix **42** is the display id. H160 values are 20-byte Portaldot account ids, **not Ethereum addresses**.
+- Blocks are 6s, sessions are 600 blocks, an era is 6 sessions (about 6 hours). `NOMINATION_CAP` stays 16 because the staking pallet does not publish MaxNominations.
 
-Leave the React screens alone. Implement `ValidatorDataProvider` and return it from `getDataProvider()`.
+## Not done yet
 
-1. **Substrate RPC** (`NEXT_PUBLIC_SUBSTRATE_RPC_URL`). Read staking and session state: commission, self-stake, era points, chill events, and slashes. Map them into the existing `Validator` fields.
-2. **EVM RPC** (`NEXT_PUBLIC_EVM_RPC_URL`) **and the score contract.** Read the published grade, the 0–100 score, the era, and the transaction that wrote it. The on-chain score replaces the mock `factors` total. Keep the breakdown as a view over the same events the contract used.
-3. **Amounts.** Set `NEXT_PUBLIC_TOKEN_SYMBOL` and `NEXT_PUBLIC_TOKEN_DECIMALS`. When they are unset the app falls back to the confirmed **tPOT** and **14 decimals**. Convert chain balances at the edge of the provider so components keep receiving whole-token numbers (or switch them to bigint strings in one place, `selfStake`).
-4. **Addresses.** SS58 prefix **42** is the display id on the card. H160 values are 20-byte Portaldot account ids. **They are not Ethereum addresses.** Do not EIP-55 checksum them and do not treat them as mainnet accounts. The current session validator list is 32-byte ids; map those when the live provider lands.
-5. **Chain id and RPCs.** `NEXT_PUBLIC_CHAIN_ID` defaults to the confirmed **420420777**. Substrate WSS is `wss://test-node-v3.portaldot.dev` and the EVM RPC is `https://test-evm-rpc-v3.portaldot.dev`. `NOMINATION_CAP` stays **16** in `lib/config.ts` because the staking pallet does not publish MaxNominations. Blocks are 6s, sessions are 600 blocks, and an era is 6 sessions (about 6 hours). History depth is 84 eras. `MIN_ERAS_TO_SCORE` (28) is still a product placeholder. `CURRENT_ERA` should come from staking `ActiveEra`.
-6. **Explorer links.** `NEXT_PUBLIC_EXPLORER_URL` is `https://node-console.portaldot.dev` (no trailing slash). "View score on-chain" and "View on Portaldot explorer" append `/tx/<hash>`. Until that variable is set, both links stay inside the app on `/contract`.
-7. **Indexer events.** Decode the pallet events in `lib/chain-events.ts` (Staking slashes, chills, kicks, rewards, era payouts, and preference changes; `Session.ValidatorDisabled`; `Offences.Offence`).
-8. **Signing.** "Sign in your wallet" does not submit an extrinsic. Wire a wallet, then call the staking nominate extrinsic with the selected set and the bond amount. The mock success tx is `MOCK_NOMINATION_TX` in `lib/config.ts`.
-
-Copy `.env.example` to `.env.local` to point at the official endpoints. With both RPC URLs empty, every page shows the banner "Testnet not connected — showing sample data". Set either URL and the banner goes away. The tables still use the mock provider until the client is implemented. Two sample rows are tagged Testnet (Ibadan Infra and Harmattan Node). The rest are Mainnet history.
-
-## Not in this scaffold
-
-Live scores, a connected wallet, and a real `staking.nominate` extrinsic. Filters, search, sort, the set builder, the source badges, and the three nominate steps all run on the mock provider.
+Reading staking fields from the Substrate RPC, a connected wallet, and a real `staking.nominate` extrinsic (the success tx in `/nominate` is `MOCK_NOMINATION_TX`).
