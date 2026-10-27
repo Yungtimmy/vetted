@@ -1,16 +1,20 @@
 import type { Metadata } from "next";
 import { eventKey, INDEXED_EVENTS } from "@/lib/chain-events";
+import { TextLink } from "@/components/text-link";
 import {
   BLOCK_TIME_SECONDS,
   CHAIN_ID,
   CHAIN_ID_FROM_ENV,
+  ERA39_PUBLISHES,
   ERA_DURATION_HOURS,
   EVM_RPC_URL,
   EXPLORER_URL,
+  EXPLORER_URL_FROM_ENV,
   HISTORY_DEPTH_ERAS,
   MIN_ERAS_TO_SCORE,
   NETWORK_NAME,
   NOMINATION_CAP,
+  SCORE_REGISTRY_ADDRESS,
   SESSION_BLOCKS,
   SESSIONS_PER_ERA,
   SS58_PREFIX,
@@ -20,10 +24,11 @@ import {
   TOKEN_SYMBOL,
   TOKEN_SYMBOL_FROM_ENV,
 } from "@/lib/config";
+import { explorerBlockHref, shortHex } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: "API & contract",
-  description: "How Vetted will read Portaldot scores, and what is mocked today.",
+  description: "ScoreRegistry address and the era-39 publish transactions.",
 };
 
 const ENDPOINTS = [
@@ -35,7 +40,10 @@ const ENDPOINTS = [
   ],
   ["NEXT_PUBLIC_SUBSTRATE_RPC_URL", SUBSTRATE_RPC_URL],
   ["NEXT_PUBLIC_EVM_RPC_URL", EVM_RPC_URL],
-  ["NEXT_PUBLIC_EXPLORER_URL", EXPLORER_URL],
+  [
+    "NEXT_PUBLIC_EXPLORER_URL",
+    EXPLORER_URL_FROM_ENV ? EXPLORER_URL : `${EXPLORER_URL} · default`,
+  ],
 ] as const;
 
 export default function ContractPage() {
@@ -45,10 +53,41 @@ export default function ContractPage() {
       <p className="mt-2 text-sm text-muted">
         The screens talk to one typed provider,{" "}
         <code className="font-mono text-fg">getDataProvider()</code> in{" "}
-        <code className="font-mono text-fg">lib/data.ts</code>. Today that
-        returns mock report cards. Replacing the provider is the whole
-        integration.
+        <code className="font-mono text-fg">lib/data.ts</code>. The default
+        reads <code className="font-mono text-fg">ScorePublished</code> logs
+        from ScoreRegistry.{" "}
+        <code className="font-mono text-fg">NEXT_PUBLIC_DATA_SOURCE=mock</code>{" "}
+        shows the sample validators.
       </p>
+
+      <section className="card mt-6" id="verify">
+        <h2 className="text-lg">Verify on-chain</h2>
+        <p className="mt-2 text-sm text-muted">
+          ScoreRegistry{" "}
+          <code className="font-mono text-fg">{SCORE_REGISTRY_ADDRESS}</code> on{" "}
+          {NETWORK_NAME}. Two active-set validators are scored for era 39.
+          Each button opens that publish&apos;s block events.
+        </p>
+        <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+          {ERA39_PUBLISHES.map((proof, index) => (
+            <TextLink
+              key={proof.tx}
+              href={explorerBlockHref(proof.block)}
+              className={index === 0 ? "btn" : "btn btn-ghost"}
+            >
+              {index === 0 ? "Verify on-chain" : "Verify second publish"} ↗
+            </TextLink>
+          ))}
+        </div>
+        <ul className="mt-4 space-y-2">
+          {ERA39_PUBLISHES.map((proof) => (
+            <li key={proof.tx} className="font-mono text-xs text-muted break-all">
+              block {proof.block} · era {proof.era} · {proof.score}/{proof.grade} ·
+              validator {shortHex(proof.validator)} · tx {proof.tx}
+            </li>
+          ))}
+        </ul>
+      </section>
 
       <h2 className="mt-8 text-lg">Chain</h2>
       <dl className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -126,11 +165,15 @@ export default function ContractPage() {
       <p className="mt-2 text-sm text-muted">
         Copy <code className="font-mono text-fg">.env.example</code> to{" "}
         <code className="font-mono text-fg">.env.local</code>. That file has
-        the official V3 endpoints. Unset chain id, symbol, and decimals fall
-        back to the confirmed defaults. &quot;View on-chain&quot; links open
-        the explorer when{" "}
-        <code className="font-mono text-fg">NEXT_PUBLIC_EXPLORER_URL</code> is
-        set, and stay on this page until then.
+        the official V3 endpoints. Unset chain id, symbol, decimals, and the
+        explorer origin fall back to the confirmed defaults. Verify links open{" "}
+        <code className="font-mono text-fg">#/blocks/&#123;height&#125;?tab=events</code>{" "}
+        on the V3 scanner. Point{" "}
+        <code className="font-mono text-fg">NEXT_PUBLIC_EXPLORER_URL</code> at
+        the node console and the same buttons use{" "}
+        <code className="font-mono text-fg">#/explorer/query/&#123;block&#125;</code>.{" "}
+        <code className="font-mono text-fg">/tx/&#123;hash&#125;</code> on that
+        console is not a transaction page.
       </p>
       <ul className="mt-4 space-y-2">
         {ENDPOINTS.map(([name, value]) => (

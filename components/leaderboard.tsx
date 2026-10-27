@@ -7,14 +7,21 @@ import { GradeBadge, gradeColor } from "@/components/grade-badge";
 import { LeaderboardSkeleton } from "@/components/skeletons";
 import { SourceBadge } from "@/components/source-badge";
 import { Sparkline } from "@/components/sparkline";
+import { TextLink } from "@/components/text-link";
 import {
   ERA_POINTS_WINDOW,
-  EXPLORER_URL,
   MIN_ERAS_TO_SCORE,
   SCORE_REGISTRY_ADDRESS,
   SLASH_WINDOW_ERAS,
 } from "@/lib/config";
-import { erasRecorded, formatEra, formatPercent, shortHex, shortSs58 } from "@/lib/format";
+import {
+  erasRecorded,
+  explorerTxHref,
+  formatEra,
+  formatPercent,
+  shortHex,
+  shortSs58,
+} from "@/lib/format";
 import type { NetworkOverview, Validator } from "@/lib/types";
 
 type BoardStatus = "ready" | "loading" | "empty" | "error";
@@ -182,6 +189,14 @@ export function Leaderboard({
                           </dd>
                         </div>
                       </dl>
+                      {validator.scoreBlock != null ? (
+                        <TextLink
+                          href={explorerTxHref(validator.scoreTx, validator.scoreBlock)}
+                          className="btn mt-3 w-full"
+                        >
+                          Verify on-chain ↗
+                        </TextLink>
+                      ) : null}
                       <Link href={`/nominate?add=${validator.id}`} className="btn btn-ghost mt-3 w-full">
                         Nominate
                       </Link>
@@ -215,7 +230,7 @@ export function Leaderboard({
                             "Commission"
                           )}
                         </th>
-                        <th scope="col" aria-label="Open report" />
+                        <th scope="col" className="text-right!" aria-label="Verify and open report" />
                       </tr>
                     </thead>
                     <tbody>
@@ -255,7 +270,15 @@ export function Leaderboard({
                           <td className={`text-right font-mono text-[12.5px] ${validator.commissionPercent > 10 && validator.stakingTracked !== false ? "neg" : ""}`}>
                             {validator.stakingTracked === false ? <Untracked /> : formatPercent(validator.commissionPercent)}
                           </td>
-                          <td className="w-[30px] text-right">
+                          <td className="text-right whitespace-nowrap">
+                            {validator.scoreBlock != null ? (
+                              <TextLink
+                                href={explorerTxHref(validator.scoreTx, validator.scoreBlock)}
+                                className="link mr-3 text-[12px]"
+                              >
+                                Verify
+                              </TextLink>
+                            ) : null}
                             <Link
                               href={`/validator/${validator.id}`}
                               className="text-lg text-dim hover:text-fg"
@@ -283,20 +306,22 @@ export function Leaderboard({
                 {shortHex(SCORE_REGISTRY_ADDRESS)}
               </code>
             </span>
-            {EXPLORER_URL ? (
-              <a
-                className="link"
-                href={`${EXPLORER_URL}/address/${SCORE_REGISTRY_ADDRESS}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                View contract on explorer ↗
-              </a>
-            ) : (
-              <Link className="link" href="/contract">
-                View contract details
+            <span className="flex flex-wrap gap-x-4 gap-y-1">
+              {validators
+                .filter((validator) => validator.scoreBlock != null)
+                .map((validator) => (
+                  <TextLink
+                    key={validator.id}
+                    href={explorerTxHref(validator.scoreTx, validator.scoreBlock)}
+                    className="link"
+                  >
+                    Verify {validator.scoreTx ? shortHex(validator.scoreTx) : "on-chain"} ↗
+                  </TextLink>
+                ))}
+              <Link className="link" href="/contract#verify">
+                ScoreRegistry
               </Link>
-            )}
+            </span>
           </div>
           <p className="mt-3.5 text-[11.5px] text-[#5e6b83]">
             Data as of era {formatEra(overview.era)}. Grades update when a new score is published.

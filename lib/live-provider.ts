@@ -46,6 +46,7 @@ function toValidator(score: PublishedScore): Validator {
     factors: [{ label: `Published score, era ${score.era}`, points: score.score }],
     history: [],
     scoreTx: score.txHash,
+    scoreBlock: score.blockNumber,
     source: "testnet-live",
     stakingTracked: false,
   };

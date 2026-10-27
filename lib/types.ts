@@ -71,6 +71,8 @@ export interface Validator {
   history: HistoryEvent[];
   /** Transaction that published the latest score, when one exists. */
   scoreTx: string | null;
+  /** Block that contains scoreTx. The explorer opens this block's events. */
+  scoreBlock?: number | null;
   /** Where this row's history comes from. */
   source: ValidatorSource;
   /**

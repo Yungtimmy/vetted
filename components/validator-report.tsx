@@ -55,12 +55,12 @@ export function ValidatorReport({
         {scored ? (
           <div className="flex flex-wrap gap-2">
             <TextLink
-              href={explorerTxHref(validator.scoreTx)}
-              className="btn btn-ghost"
+              href={explorerTxHref(validator.scoreTx, validator.scoreBlock)}
+              className="btn"
             >
-              View score on-chain ↗
+              Verify on-chain ↗
             </TextLink>
-            <Link href={`/nominate?add=${validator.id}`} className="btn">
+            <Link href={`/nominate?add=${validator.id}`} className="btn btn-ghost">
               Nominate
             </Link>
           </div>
@@ -98,6 +98,7 @@ function ScoredReport({
           <p className="text-xs text-muted">
             Era {formatEra(era)}
             {validator.scoreTx ? ` · tx ${shortHex(validator.scoreTx)}` : ""}
+            {validator.scoreBlock != null ? ` · block ${formatEra(validator.scoreBlock)}` : ""}
           </p>
           <div className="mt-3 flex justify-center">
             <Sparkline

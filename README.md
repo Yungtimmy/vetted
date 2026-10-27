@@ -5,7 +5,7 @@ Validator risk report cards for the Portaldot network. Built for Portaldot Hacke
 Each era, Vetted scores a validator from 0 to 100 and publishes that score on-chain. This app is the nominator-facing dashboard: a leaderboard, a per-validator report card, and a flow for building a safer nomination set.
 
 - **Live site:** https://tryvetted.vercel.app
-- **Demo video:** https://youtu.be/PwV31kM66DI
+- **Demo video:** https://youtu.be/UibQCbTyWHk
 
 ## Live on Portaldot V3 testnet
 
@@ -18,16 +18,18 @@ Scores are read live from the `ScoreRegistry` contract on PortaldotV3 Test (chai
 | Source | [`contracts/ScoreRegistry.sol`](contracts/ScoreRegistry.sol) |
 | EVM RPC | `https://test-evm-rpc-v3.portaldot.dev` |
 | Substrate RPC | `wss://test-node-v3.portaldot.dev` |
-| Explorer | `https://node-console.portaldot.dev` |
+| Explorer | [V3 testnet scanner](https://scanner-testnet-v3.portaldot.dev) |
 
 That file is the source for the live deployment above. `publish` emits `ScorePublished(bytes32 indexed validator, uint256 indexed era, uint256 score, uint256 grade)`, the log `lib/score-registry.ts` decodes. From `contracts/`, `npm install` then `npm test` compiles it and checks the grade bands. This repo does not redeploy the contract.
 
-Publish transactions (`ScorePublished` logs on the contract):
+Publish transactions (`ScorePublished` logs on the contract). Both are era 39, both validators are in the active set, and each link opens that block's events on the scanner:
 
 | Block | Tx | Validator | Era | Score |
 | --- | --- | --- | --- | --- |
-| 144339 | `0x76a7bd7259f660c546c1532a46ba79d353e1df5121d11fbcc8838f836c969dcf` | `0x849a279f…` | 39 | 100 / A |
-| 144343 | `0xf197cb76814284676fb41ee3cad7e07452a309adab6f1a1616608d41de6e874d` | `0xd40a5b57…` | 39 | 100 / A |
+| [144339](https://scanner-testnet-v3.portaldot.dev/#/blocks/144339?tab=events) | [`0x76a7bd7259f660c546c1532a46ba79d353e1df5121d11fbcc8838f836c969dcf`](https://scanner-testnet-v3.portaldot.dev/#/blocks/144339?tab=events) | `0x849a279f…` | 39 | 100 / A |
+| [144343](https://scanner-testnet-v3.portaldot.dev/#/blocks/144343?tab=events) | [`0xf197cb76814284676fb41ee3cad7e07452a309adab6f1a1616608d41de6e874d`](https://scanner-testnet-v3.portaldot.dev/#/blocks/144343?tab=events) | `0xd40a5b57…` | 39 | 100 / A |
+
+The scanner is a hash app. `#/blocks/{height}?tab=events` opens the block; a `/blocks/{height}` path without the hash stays on the homepage. `/tx/{hash}` on the node console is not a transaction page either. That site is a single-page app, and any path returns the shell. A block opens at [query 144339](https://node-console.portaldot.dev/?rpc=wss%3A%2F%2Ftest-node-v3.portaldot.dev#/explorer/query/144339) and [query 144343](https://node-console.portaldot.dev/?rpc=wss%3A%2F%2Ftest-node-v3.portaldot.dev#/explorer/query/144343). The scanner hash route above is what the app's Verify on-chain buttons use unless `NEXT_PUBLIC_EXPLORER_URL` is the node console.
 
 An earlier test publish for Alice's dev account (era 1285, block 107808, tx `0xcf69a7c7600b6c896460da472f4f2049d732a3fecbd344c074737b12ac9b1894`) is still on the contract. Alice is not a validator on this chain, so the site hides her (`lib/active-set.ts`).
 
@@ -55,7 +57,7 @@ Next integrations (named only, not built): wallet badge · staking UI.
 
 - **What ships:** each era’s report card ends as a ScorePublished on-chain artifact — era · score/100 · grade A–F · publish tx — not a dashboard screenshot and not a private API response.
 - **Why it matters:** any wallet, staking contract, or explorer UI can verify the same artifact on ScoreRegistry; trust does not sit in Vetted’s server.
-- **Live proof:** Portaldot V3 era 39 — grade A / 100 on ScoreRegistry `0xeebc363c7af7ed8e888da07e959043517ae4b97d`, publish tx `0x76a7bd72…969dcf`.
+- **Live proof:** Portaldot V3 era 39 — grade A / 100 on ScoreRegistry `0xeebc363c7af7ed8e888da07e959043517ae4b97d`. Two active-set validators: publish tx [`0x76a7bd7259f660c546c1532a46ba79d353e1df5121d11fbcc8838f836c969dcf`](https://scanner-testnet-v3.portaldot.dev/#/blocks/144339?tab=events) (`0x849a279f…`, block 144339) and [`0xf197cb76814284676fb41ee3cad7e07452a309adab6f1a1616608d41de6e874d`](https://scanner-testnet-v3.portaldot.dev/#/blocks/144343?tab=events) (`0xd40a5b57…`, block 144343). Multi-era publishes are the next proof step. There is no second-era transaction yet.
 
 ## Architecture
 
@@ -78,7 +80,7 @@ The scorer is not part of this repo; it writes scores with `publish`. The site o
 | `/validator/[id]` | Report card. Scored validators get a point-by-point breakdown, history, and a rewards chart. Validators with fewer than 28 eras get the "Not enough history" state and are never graded F for being new. The same source badge sits next to the name. |
 | `/nominate` | Card grid plus a sticky "Your set" panel. The nomination cap stays 16. The staking pallet does not publish MaxNominations, so `NOMINATION_CAP` in `lib/config.ts` stays that placeholder. Review and the wallet step are mocked. |
 | `/methodology` | How the score is explained. |
-| `/contract` | Chain constants and the plan for swapping in live reads. |
+| `/contract` | Chain constants, the ScoreRegistry address, and one-click links to both era-39 publishes. |
 
 ## Stack
 
