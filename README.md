@@ -33,6 +33,18 @@ An earlier test publish for Alice's dev account (era 1285, block 107808, tx `0xc
 
 Not live yet: staking fields from the Substrate side (commission, slashes, chills, stake, era points) are not read, so they show as zero or empty. The wallet step in `/nominate` is still mocked and does not submit `staking.nominate`.
 
+## Portaldot ecosystem
+
+### Why Portaldot
+
+1. Portaldot V3 runs validators and EVM contracts on one stack. Vetted's scores can live on-chain next to the nodes they rate, not on a separate L2.
+2. Stakers and node ops need a trust signal that is not a Discord spreadsheet. [`ScoreRegistry`](contracts/ScoreRegistry.sol) at `0xeebc363c7af7ed8e888da07e959043517ae4b97d` makes risk readable by any wallet or dashboard.
+3. The same pattern scales. Once scores are on V3, staking UIs and explorer badges can pull them without trusting our server.
+
+Who consumes the score: stakers picking validators · node ops benchmarking peers · wallets/dashboards showing a risk badge.
+
+Next integrations (named only, not built): wallet badge · staking UI.
+
 ## Architecture
 
 ```mermaid
