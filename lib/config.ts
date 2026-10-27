@@ -127,6 +127,9 @@ export const SUBSTRATE_RPC_URL = envString(
   process.env.NEXT_PUBLIC_SUBSTRATE_RPC_URL,
 );
 
+/** Confirmed V3 testnet Substrate endpoint. Node-console deep links use it. */
+export const TESTNET_SUBSTRATE_RPC_URL = "wss://test-node-v3.portaldot.dev";
+
 /** Confirmed V3 testnet EVM JSON-RPC. Used when NEXT_PUBLIC_EVM_RPC_URL is unset. */
 const FALLBACK_EVM_RPC_URL = "https://test-evm-rpc-v3.portaldot.dev";
 
@@ -159,8 +162,43 @@ export const DATA_SOURCE: "live" | "mock" =
 /** The EVM RPC rejects requests without a User-Agent. */
 export const RPC_USER_AGENT = "vetted/0.1 (+https://github.com/Yungtimmy/vetted)";
 
-/** Explorer origin, no trailing slash. Empty until a deployment sets it. */
-export const EXPLORER_URL = envString(process.env.NEXT_PUBLIC_EXPLORER_URL);
+/**
+ * V3 testnet scanner. `#/blocks/{height}?tab=events` opens the block that
+ * contains a ScorePublished log. A path without the hash stays on the
+ * homepage. The node console is an SPA: `/tx/{hash}` is not a transaction page.
+ */
+const FALLBACK_EXPLORER_URL = "https://scanner-testnet-v3.portaldot.dev";
+
+const explorerFromEnv = envString(process.env.NEXT_PUBLIC_EXPLORER_URL);
+
+/** False when the UI is using the scanner default above. */
+export const EXPLORER_URL_FROM_ENV = explorerFromEnv.length > 0;
+
+/** Explorer origin, no trailing slash. */
+export const EXPLORER_URL = explorerFromEnv || FALLBACK_EXPLORER_URL;
+
+/**
+ * Era-39 ScorePublished transactions already on ScoreRegistry.
+ * Both validators are in the testnet active set. There is no later era.
+ */
+export const ERA39_PUBLISHES = [
+  {
+    block: 144339,
+    tx: "0x76a7bd7259f660c546c1532a46ba79d353e1df5121d11fbcc8838f836c969dcf",
+    validator: "0x849a279f6c2ad8f0a66953cb89bdeff513b1a4ded437e41cb7dbd69726176b0c",
+    era: 39,
+    score: 100,
+    grade: "A",
+  },
+  {
+    block: 144343,
+    tx: "0xf197cb76814284676fb41ee3cad7e07452a309adab6f1a1616608d41de6e874d",
+    validator: "0xd40a5b57ee622816c3cf13cfb58bbb44c60b2b03f9fc838386816aea05b0ac47",
+    era: 39,
+    score: 100,
+    grade: "A",
+  },
+] as const;
 
 /** True when scores come from the chain rather than the sample set. */
 export const RPC_CONFIGURED = DATA_SOURCE === "live";

@@ -4,8 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import type { ReactNode } from "react";
-import { EXPLORER_URL } from "@/lib/config";
-import { formatEra } from "@/lib/format";
+import { explorerHomeHref, formatEra } from "@/lib/format";
 
 type IconName = "bars" | "box" | "plus" | "doc" | "code" | "ext";
 
@@ -60,16 +59,12 @@ const SECTIONS: { title: string; items: NavItem[] }[] = [
     items: [
       { href: "/methodology", label: "Methodology", icon: "doc", mode: "exact" },
       { href: "/contract", label: "API & contract", icon: "code", mode: "exact" },
-      ...(EXPLORER_URL
-        ? [
-            {
-              href: EXPLORER_URL,
-              label: "Portaldot explorer",
-              icon: "ext" as const,
-              mode: "external" as const,
-            },
-          ]
-        : []),
+      {
+        href: explorerHomeHref(),
+        label: "Portaldot explorer",
+        icon: "ext" as const,
+        mode: "external" as const,
+      },
     ],
   },
 ];

@@ -19,6 +19,7 @@ import {
   erasRecorded,
   explorerTxHref,
   formatEra,
+  isExternalHref,
   formatReward,
   formatToken,
   parseBond,
@@ -561,6 +562,7 @@ function ReviewStep({
 }
 
 function SentStep({ era }: { era: number }) {
+  const txHref = explorerTxHref(MOCK_NOMINATION_TX);
   return (
     <div className="card max-w-[640px] px-6 py-12 text-center">
       <div
@@ -573,8 +575,8 @@ function SentStep({ era }: { era: number }) {
       <p className="mt-2 font-mono text-xs text-muted">
         tx {shortHex(MOCK_NOMINATION_TX)} · era {formatEra(era)}
       </p>
-      <TextLink href={explorerTxHref(MOCK_NOMINATION_TX)} className="link mt-2 inline-block">
-        View on Portaldot explorer ↗
+      <TextLink href={txHref} className="link mt-2 inline-block">
+        {isExternalHref(txHref) ? "View on Portaldot explorer ↗" : "API & contract"}
       </TextLink>
     </div>
   );

@@ -1,4 +1,4 @@
-import { EXPLORER_URL } from "@/lib/config";
+import { EXPLORER_URL, TESTNET_SUBSTRATE_RPC_URL } from "@/lib/config";
 
 export function formatEra(era: number): string {
   return era.toLocaleString("en-US");
@@ -50,13 +50,64 @@ export function parseBond(value: string): number {
   return amount;
 }
 
+function explorerOrigin(): string {
+  return EXPLORER_URL.replace(/\/$/, "");
+}
+
+/** Polkadot.js apps shell. Paths like /tx/{hash} return index.html. */
+function isNodeConsole(origin: string): boolean {
+  return origin.includes("node-console.portaldot.dev");
+}
+
 /**
- * Explorer link for a published score or nomination tx.
- * Falls back to the API page while NEXT_PUBLIC_EXPLORER_URL is unset.
+ * Opens the block whose events include a ScorePublished log.
+ * Scanner: hash route `#/blocks/{height}?tab=events` (a plain
+ * `/blocks/{height}` path stays on the homepage).
+ * Node console: `/?rpc=<v3 wss>#/explorer/query/{height}`.
  */
-export function explorerTxHref(tx: string | null): string {
-  if (!EXPLORER_URL || !tx) return "/contract";
-  return `${EXPLORER_URL.replace(/\/$/, "")}/tx/${tx}`;
+export function explorerBlockHref(blockNumber: number): string {
+  const origin = explorerOrigin();
+  if (!origin) return "/contract";
+  if (isNodeConsole(origin)) {
+    const rpc = encodeURIComponent(TESTNET_SUBSTRATE_RPC_URL);
+    return `${origin}/?rpc=${rpc}#/explorer/query/${blockNumber}`;
+  }
+  return `${origin}/#/blocks/${blockNumber}?tab=events`;
+}
+
+/** Explorer home. The node console is pinned to the V3 testnet RPC. */
+export function explorerHomeHref(): string {
+  const origin = explorerOrigin();
+  if (!origin) return "/contract";
+  if (isNodeConsole(origin)) {
+    const rpc = encodeURIComponent(TESTNET_SUBSTRATE_RPC_URL);
+    return `${origin}/?rpc=${rpc}#/explorer`;
+  }
+  return origin;
+}
+
+/**
+ * Explorer link for a published score.
+ * Pass the block when it is known: neither the V3 scanner nor the node
+ * console can open an EVM tx hash. Without a block, those two origins
+ * stay on /contract instead of a dead /tx path.
+ */
+export function explorerTxHref(
+  tx: string | null,
+  blockNumber?: number | null,
+): string {
+  if (blockNumber != null && Number.isInteger(blockNumber) && blockNumber >= 0) {
+    return explorerBlockHref(blockNumber);
+  }
+  const origin = explorerOrigin();
+  if (!origin || !tx) return "/contract";
+  if (
+    isNodeConsole(origin) ||
+    origin.includes("scanner-testnet-v3.portaldot.dev")
+  ) {
+    return "/contract";
+  }
+  return `${origin}/tx/${tx}`;
 }
 
 export function isExternalHref(href: string): boolean {
