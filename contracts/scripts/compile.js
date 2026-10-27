@@ -1,0 +1,11 @@
+const fs=require('fs'),path=require('path'),solc=require('solc');
+const src=fs.readFileSync(path.join(__dirname,'../ScoreRegistry.sol'),'utf8');
+const input={language:'Solidity',sources:{'ScoreRegistry.sol':{content:src}},settings:{optimizer:{enabled:true,runs:200},evmVersion:'paris',outputSelection:{'*':{'*':['abi','evm.bytecode.object','evm.deployedBytecode.object']}}}};
+const out=JSON.parse(solc.compile(JSON.stringify(input)));
+const errs=(out.errors||[]).filter(e=>e.severity==='error');
+(out.errors||[]).forEach(e=>console.error(e.formattedMessage));
+if(errs.length) process.exit(1);
+const c=out.contracts['ScoreRegistry.sol'].ScoreRegistry;
+fs.mkdirSync(path.join(__dirname,'../build'),{recursive:true});
+fs.writeFileSync(path.join(__dirname,'../build/ScoreRegistry.json'),JSON.stringify({abi:c.abi,bytecode:'0x'+c.evm.bytecode.object},null,2));
+console.log('compiled ScoreRegistry, init code',c.evm.bytecode.object.length/2,'bytes');

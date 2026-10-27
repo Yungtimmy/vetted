@@ -1,0 +1,10 @@
+import {compile} from '@parity/resolc'; import fs from 'fs';
+const mode=process.argv[2]||'z';
+const src=fs.readFileSync('ScoreRegistry.sol','utf8');
+const out=await compile({'ScoreRegistry.sol':{content:src}},{optimizer:{enabled:true,mode}});
+(out.errors||[]).forEach(e=>console.error(e.formattedMessage||e.message));
+const c=out.contracts['ScoreRegistry.sol'].ScoreRegistry;
+const hex=c.evm.bytecode.object;
+fs.writeFileSync('build/ScoreRegistry.polkavm',Buffer.from(hex,'hex'));
+fs.writeFileSync('build/ScoreRegistry.abi.json',JSON.stringify(c.abi,null,2));
+console.log('mode',mode,'size',hex.length/2,'bytes');
