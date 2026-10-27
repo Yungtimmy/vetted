@@ -45,6 +45,16 @@ Who consumes the score: stakers picking validators · node ops benchmarking peer
 
 Next integrations (named only, not built): wallet badge · staking UI.
 
+### Commercial (who pays / why it sticks)
+
+- **Buyer:** staking protocols, wallets, and explorer UIs that need a validator risk signal without running their own scoring stack.
+- **Model:** free public reads of ScoreRegistry; paid path later = higher-frequency / custom scoring for operators who want private or weighted feeds.
+- **Why Portaldot wins:** one chain for nodes + EVM scores → lower integration cost than bolting an off-chain API onto every client.
+
+### Innovation beat
+
+- Not “another dashboard” — scores are on-chain artifacts (era, grade, publish tx) any contract or UI can verify, so trust doesn’t sit in our server.
+
 ## Architecture
 
 ```mermaid
