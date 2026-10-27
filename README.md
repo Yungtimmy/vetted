@@ -53,7 +53,9 @@ Next integrations (named only, not built): wallet badge · staking UI.
 
 ### Innovation beat
 
-- Not “another dashboard” — scores are on-chain artifacts (era, grade, publish tx) any contract or UI can verify, so trust doesn’t sit in our server.
+- **What ships:** each era’s report card ends as a ScorePublished on-chain artifact — era · score/100 · grade A–F · publish tx — not a dashboard screenshot and not a private API response.
+- **Why it matters:** any wallet, staking contract, or explorer UI can verify the same artifact on ScoreRegistry; trust does not sit in Vetted’s server.
+- **Live proof:** Portaldot V3 era 39 — grade A / 100 on ScoreRegistry `0xeebc363c7af7ed8e888da07e959043517ae4b97d`, publish tx `0x76a7bd72…969dcf`.
 
 ## Architecture
 
