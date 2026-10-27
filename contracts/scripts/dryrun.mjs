@@ -1,0 +1,10 @@
+import {ApiPromise,WsProvider,HttpProvider} from '@polkadot/api'; import fs from 'fs';
+const api=await ApiPromise.create({provider:new HttpProvider('https://test-node-v3.portaldot.dev',{'User-Agent':'vetted'}),noInitWarn:true});
+const code='0x'+fs.readFileSync('build/ScoreRegistry.polkavm').toString('hex');
+const origin='5Dt6Eh7frZCztm1azJMzwkykygurBt1qiBxFooh5ZgWgqhFh';
+console.log(Object.keys(api.call.reviveApi||{}));
+const r=await api.call.reviveApi.instantiate(origin,0,null,null,{Upload:code},'0x',null);
+const j=r.toJSON(); delete j.result?.ok?.result?.data; console.log(JSON.stringify(j));
+const fee=await api.call.reviveApi.blockGasLimit?.(); 
+console.log('existentialDeposit',api.consts.balances.existentialDeposit.toString(), 'depositPerByte',api.consts.revive?.depositPerByte?.toString(),'depositPerItem',api.consts.revive?.depositPerItem?.toString());
+process.exit(0);

@@ -15,9 +15,12 @@ Scores are read live from the `ScoreRegistry` contract on PortaldotV3 Test (chai
 | --- | --- |
 | Contract | `0xeebc363c7af7ed8e888da07e959043517ae4b97d` |
 | Deployed at block | 107303 |
+| Source | [`contracts/ScoreRegistry.sol`](contracts/ScoreRegistry.sol) |
 | EVM RPC | `https://test-evm-rpc-v3.portaldot.dev` |
 | Substrate RPC | `wss://test-node-v3.portaldot.dev` |
 | Explorer | `https://node-console.portaldot.dev` |
+
+That file is the source for the live deployment above. `publish` emits `ScorePublished(bytes32 indexed validator, uint256 indexed era, uint256 score, uint256 grade)`, the log `lib/score-registry.ts` decodes. From `contracts/`, `npm install` then `npm test` compiles it and checks the grade bands. This repo does not redeploy the contract.
 
 Publish transactions (`ScorePublished` logs on the contract):
 
