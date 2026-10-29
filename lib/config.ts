@@ -178,8 +178,9 @@ export const EXPLORER_URL_FROM_ENV = explorerFromEnv.length > 0;
 export const EXPLORER_URL = explorerFromEnv || FALLBACK_EXPLORER_URL;
 
 /**
- * Era-39 ScorePublished transactions already on ScoreRegistry.
- * Both validators are in the testnet active set. There is no later era.
+ * Era-39 ScorePublished transactions on ScoreRegistry.
+ * Both validators are in the testnet active set. These are the first era.
+ * Era 64 publishes are cited in the README and are not linked from this page.
  */
 export const ERA39_PUBLISHES = [
   {

@@ -22,12 +22,14 @@ Scores are read live from the `ScoreRegistry` contract on PortaldotV3 Test (chai
 
 That file is the source for the live deployment above. `publish` emits `ScorePublished(bytes32 indexed validator, uint256 indexed era, uint256 score, uint256 grade)`, the log `lib/score-registry.ts` decodes. From `contracts/`, `npm install` then `npm test` compiles it and checks the grade bands. This repo does not redeploy the contract.
 
-Publish transactions (`ScorePublished` logs on the contract). Both are era 39, both validators are in the active set, and each link opens that block's events on the scanner:
+Publish transactions (`ScorePublished` logs on the contract). Era 39 is the first era. Era 64 is the second era, on the same two active-set validators. Each link opens that block's events on the scanner:
 
 | Block | Tx | Validator | Era | Score |
 | --- | --- | --- | --- | --- |
 | [144339](https://scanner-testnet-v3.portaldot.dev/#/blocks/144339?tab=events) | [`0x76a7bd7259f660c546c1532a46ba79d353e1df5121d11fbcc8838f836c969dcf`](https://scanner-testnet-v3.portaldot.dev/#/blocks/144339?tab=events) | `0x849a279f…` | 39 | 100 / A |
 | [144343](https://scanner-testnet-v3.portaldot.dev/#/blocks/144343?tab=events) | [`0xf197cb76814284676fb41ee3cad7e07452a309adab6f1a1616608d41de6e874d`](https://scanner-testnet-v3.portaldot.dev/#/blocks/144343?tab=events) | `0xd40a5b57…` | 39 | 100 / A |
+| [234726](https://scanner-testnet-v3.portaldot.dev/#/blocks/234726?tab=events) | [`0xbb5f03f2f0c16c27a1fba61e47953252b839f30dbcef0ba1992ba1a65a04af8a`](https://scanner-testnet-v3.portaldot.dev/#/blocks/234726?tab=events) | `0x849a279f…` | 64 | 100 / A |
+| [234727](https://scanner-testnet-v3.portaldot.dev/#/blocks/234727?tab=events) | [`0x045bfa8c6b17ca8b08b3d5ac91e51443194de4420d03a61e63ab9004163ddd59`](https://scanner-testnet-v3.portaldot.dev/#/blocks/234727?tab=events) | `0xd40a5b57…` | 64 | 100 / A |
 
 The scanner is a hash app. `#/blocks/{height}?tab=events` opens the block; a `/blocks/{height}` path without the hash stays on the homepage. `/tx/{hash}` on the node console is not a transaction page either. That site is a single-page app, and any path returns the shell. A block opens at [query 144339](https://node-console.portaldot.dev/?rpc=wss%3A%2F%2Ftest-node-v3.portaldot.dev#/explorer/query/144339) and [query 144343](https://node-console.portaldot.dev/?rpc=wss%3A%2F%2Ftest-node-v3.portaldot.dev#/explorer/query/144343). The scanner hash route above is what the app's Verify on-chain buttons use unless `NEXT_PUBLIC_EXPLORER_URL` is the node console.
 
@@ -57,7 +59,7 @@ Next integrations (named only, not built): wallet badge · staking UI.
 
 - **What ships:** each era’s report card ends as a ScorePublished on-chain artifact — era · score/100 · grade A–F · publish tx — not a dashboard screenshot and not a private API response.
 - **Why it matters:** any wallet, staking contract, or explorer UI can verify the same artifact on ScoreRegistry; trust does not sit in Vetted’s server.
-- **Live proof:** Portaldot V3 era 39 — grade A / 100 on ScoreRegistry `0xeebc363c7af7ed8e888da07e959043517ae4b97d`. Two active-set validators: publish tx [`0x76a7bd7259f660c546c1532a46ba79d353e1df5121d11fbcc8838f836c969dcf`](https://scanner-testnet-v3.portaldot.dev/#/blocks/144339?tab=events) (`0x849a279f…`, block 144339) and [`0xf197cb76814284676fb41ee3cad7e07452a309adab6f1a1616608d41de6e874d`](https://scanner-testnet-v3.portaldot.dev/#/blocks/144343?tab=events) (`0xd40a5b57…`, block 144343). Multi-era publishes are the next proof step. There is no second-era transaction yet.
+- **Live proof:** Portaldot V3 eras 39 and 64 — grade A / 100 on ScoreRegistry `0xeebc363c7af7ed8e888da07e959043517ae4b97d`. Era 39 is the first era. The same two active-set validators published again in era 64. Era 39: [`0x76a7bd7259f660c546c1532a46ba79d353e1df5121d11fbcc8838f836c969dcf`](https://scanner-testnet-v3.portaldot.dev/#/blocks/144339?tab=events) (`0x849a279f…`, block 144339) and [`0xf197cb76814284676fb41ee3cad7e07452a309adab6f1a1616608d41de6e874d`](https://scanner-testnet-v3.portaldot.dev/#/blocks/144343?tab=events) (`0xd40a5b57…`, block 144343). Era 64: [`0xbb5f03f2f0c16c27a1fba61e47953252b839f30dbcef0ba1992ba1a65a04af8a`](https://scanner-testnet-v3.portaldot.dev/#/blocks/234726?tab=events) (`0x849a279f…`, block 234726) and [`0x045bfa8c6b17ca8b08b3d5ac91e51443194de4420d03a61e63ab9004163ddd59`](https://scanner-testnet-v3.portaldot.dev/#/blocks/234727?tab=events) (`0xd40a5b57…`, block 234727).
 
 ## Architecture
 
