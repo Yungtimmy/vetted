@@ -22,7 +22,7 @@
     "solc": "0.8.28"
   },
   "devDependencies": {
-    "@parity/resolc": "^1.4.0",
+    "@parity/resolc": "1.4.0",
     "ganache": "^7.9.2"
   },
   "overrides": {
