@@ -13,6 +13,15 @@ export function gradeColor(grade: Grade): string {
   return COLOR[grade];
 }
 
+function markStyle(grade: Grade, borderMix: string) {
+  return {
+    color: COLOR[grade],
+    borderColor: `color-mix(in srgb, ${COLOR[grade]} ${borderMix}, transparent)`,
+    background: `color-mix(in srgb, ${COLOR[grade]} 12%, transparent)`,
+  };
+}
+
+/** 28px letter mark used on the leaderboard and compact set score. */
 export function GradeBadge({
   grade,
   score,
@@ -26,18 +35,16 @@ export function GradeBadge({
   return (
     <span className="inline-flex items-center gap-2">
       <span
-        className="grade-letter grid h-6 min-w-7 place-items-center rounded-[5px] border px-1 text-[13px] leading-none"
+        className="grade-letter grid h-7 min-w-7 place-items-center rounded-[6px] border px-1 text-[13px] leading-none"
         style={{
-          color: COLOR[grade],
-          borderColor: `color-mix(in srgb, ${COLOR[grade]} 33%, transparent)`,
-          background: `color-mix(in srgb, ${COLOR[grade]} 8%, transparent)`,
+          ...markStyle(grade, "32%"),
           fontSize: isNew ? 10 : undefined,
         }}
       >
         {grade}
       </span>
       {showScore ? (
-        <span className="font-mono text-xs text-muted">
+        <span className="font-mono text-xs text-dim tabular-nums">
           {score == null ? "n/a" : `${score}/100`}
         </span>
       ) : null}
@@ -45,6 +52,7 @@ export function GradeBadge({
   );
 }
 
+/** 56px letter mark on a report. The md size matches the leaderboard mark. */
 export function GradeSeal({
   grade,
   size = "lg",
@@ -53,17 +61,15 @@ export function GradeSeal({
   size?: "lg" | "md";
 }) {
   const isNew = grade === "NEW";
-  const dimensions = size === "lg" ? "h-[120px] w-[120px]" : "h-16 w-16";
-  const typeSize =
-    size === "lg" ? (isNew ? "text-[30px]" : "text-[56px]") : "text-[28px]";
+  const dimensions =
+    size === "lg"
+      ? "h-14 w-14 rounded-[10px] text-[28px]"
+      : "h-7 w-7 rounded-[6px] text-[13px]";
+  const typeSize = isNew ? (size === "lg" ? "text-sm" : "text-[9px]") : "";
   return (
     <div
-      className={`grade-letter grid place-items-center rounded-full leading-none ${dimensions} ${typeSize}`}
-      style={{
-        background: COLOR[grade],
-        color: isNew ? "var(--fg)" : "var(--bg)",
-      }}
-      aria-hidden
+      className={`grade-letter grid place-items-center border leading-none ${dimensions} ${typeSize}`}
+      style={markStyle(grade, size === "lg" ? "36%" : "32%")}
     >
       {grade}
     </div>

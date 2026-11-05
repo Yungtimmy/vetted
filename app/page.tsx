@@ -6,9 +6,9 @@ import { getDataProvider } from "@/lib/data";
 import { readPreviewState } from "@/lib/preview";
 
 export const metadata: Metadata = {
-  title: "Validator report cards",
+  title: "Leaderboard",
   description:
-    "Know who you're staking with. Scores published on-chain every era.",
+    "On-chain grades for Portaldot validators. Stake with a published score, not a feeling.",
 };
 
 export default function HomePage({
