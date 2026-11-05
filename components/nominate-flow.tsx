@@ -349,7 +349,7 @@ function ValidatorCard({
       <Link
         href={`/validator/${validator.id}`}
         onClick={(event) => event.stopPropagation()}
-        className="mt-2.5 block font-semibold text-fg hover:text-accent-soft"
+        className="mt-2.5 block break-all font-medium text-fg hover:text-teal"
       >
         {validator.name}
       </Link>
@@ -566,7 +566,11 @@ function SentStep({ era }: { era: number }) {
   return (
     <div className="card max-w-[640px] px-6 py-12 text-center">
       <div
-        className="grade-letter mx-auto mb-3 grid h-[120px] w-[120px] place-items-center rounded-full bg-teal text-5xl text-bg"
+        className="grade-letter mx-auto mb-3 grid h-14 w-14 place-items-center rounded-[10px] border text-[28px] text-teal"
+        style={{
+          background: "color-mix(in srgb, var(--accent) 12%, transparent)",
+          borderColor: "color-mix(in srgb, var(--accent) 32%, transparent)",
+        }}
         aria-hidden
       >
         ✓

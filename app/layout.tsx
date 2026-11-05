@@ -1,22 +1,22 @@
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
-import { Geist_Mono, Space_Grotesk } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import { AppShell } from "@/components/app-shell";
 import { CURRENT_ERA, NETWORK_NAME, RPC_CONFIGURED } from "@/lib/config";
 import { getDataProvider } from "@/lib/data";
 import "./globals.css";
 
-const space = Space_Grotesk({
+const inter = Inter({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-space",
+  weight: ["400", "500", "600"],
+  variable: "--font-inter",
   display: "swap",
 });
 
-const mono = Geist_Mono({
+const mono = JetBrains_Mono({
   subsets: ["latin"],
-  weight: ["400", "600", "700"],
-  variable: "--font-geist-mono",
+  weight: ["400", "500"],
+  variable: "--font-jetbrains",
   display: "swap",
 });
 
@@ -37,7 +37,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${space.variable} ${mono.variable} h-full antialiased`}
+      className={`${inter.variable} ${mono.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-bg font-sans text-fg">
         <AppShell
