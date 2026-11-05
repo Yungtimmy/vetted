@@ -5,12 +5,12 @@ import {
   BLOCK_TIME_SECONDS,
   CHAIN_ID,
   CHAIN_ID_FROM_ENV,
-  ERA39_PUBLISHES,
   ERA_DURATION_HOURS,
   EVM_RPC_URL,
   EXPLORER_URL,
   EXPLORER_URL_FROM_ENV,
   HISTORY_DEPTH_ERAS,
+  LIVE_PROOF_PUBLISHES,
   MIN_ERAS_TO_SCORE,
   NETWORK_NAME,
   NOMINATION_CAP,
@@ -28,7 +28,8 @@ import { explorerBlockHref, shortHex } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: "API & contract",
-  description: "ScoreRegistry address and the era-39 publish transactions.",
+  description:
+    "ScoreRegistry address and the era 39 and era 64 publish transactions.",
 };
 
 const ENDPOINTS = [
@@ -65,22 +66,23 @@ export default function ContractPage() {
         <p className="mt-2 text-sm text-muted">
           ScoreRegistry{" "}
           <code className="font-mono text-fg">{SCORE_REGISTRY_ADDRESS}</code> on{" "}
-          {NETWORK_NAME}. Two active-set validators are scored for era 39.
-          Each button opens that publish&apos;s block events.
+          {NETWORK_NAME}. Two active-set validators are scored for eras 39
+          and 64. Era 39 is the first era. The same two validators published
+          again in era 64. Each button opens that publish&apos;s block events.
         </p>
-        <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-          {ERA39_PUBLISHES.map((proof, index) => (
+        <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+          {LIVE_PROOF_PUBLISHES.map((proof, index) => (
             <TextLink
               key={proof.tx}
               href={explorerBlockHref(proof.block)}
               className={index === 0 ? "btn" : "btn btn-ghost"}
             >
-              {index === 0 ? "Verify on-chain" : "Verify second publish"} ↗
+              Era {proof.era} · {shortHex(proof.validator)} ↗
             </TextLink>
           ))}
         </div>
         <ul className="mt-4 space-y-2">
-          {ERA39_PUBLISHES.map((proof) => (
+          {LIVE_PROOF_PUBLISHES.map((proof) => (
             <li key={proof.tx} className="font-mono text-xs text-muted break-all">
               block {proof.block} · era {proof.era} · {proof.score}/{proof.grade} ·
               validator {shortHex(proof.validator)} · tx {proof.tx}

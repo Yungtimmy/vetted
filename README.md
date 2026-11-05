@@ -82,7 +82,7 @@ The scorer is not part of this repo; it writes scores with `publish`. The site o
 | `/validator/[id]` | Report card. Scored validators get a point-by-point breakdown, history, and a rewards chart. Validators with fewer than 28 eras get the "Not enough history" state and are never graded F for being new. The same source badge sits next to the name. |
 | `/nominate` | Card grid plus a sticky "Your set" panel. The nomination cap stays 16. The staking pallet does not publish MaxNominations, so `NOMINATION_CAP` in `lib/config.ts` stays that placeholder. Review and the wallet step are mocked. |
 | `/methodology` | How the score is explained. |
-| `/contract` | Chain constants, the ScoreRegistry address, and one-click links to both era-39 publishes. |
+| `/contract` | Chain constants, the ScoreRegistry address, and one-click links to the era-39 and era-64 publishes. |
 
 ## Stack
 

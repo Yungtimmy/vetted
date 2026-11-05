@@ -178,11 +178,11 @@ export const EXPLORER_URL_FROM_ENV = explorerFromEnv.length > 0;
 export const EXPLORER_URL = explorerFromEnv || FALLBACK_EXPLORER_URL;
 
 /**
- * Era-39 ScorePublished transactions on ScoreRegistry.
- * Both validators are in the testnet active set. These are the first era.
- * Era 64 publishes are cited in the README and are not linked from this page.
+ * ScorePublished transactions on ScoreRegistry for the two active-set
+ * validators. Era 39 is the first era. Era 64 is the same pair again.
+ * The /contract Verify section links each block's events.
  */
-export const ERA39_PUBLISHES = [
+export const LIVE_PROOF_PUBLISHES = [
   {
     block: 144339,
     tx: "0x76a7bd7259f660c546c1532a46ba79d353e1df5121d11fbcc8838f836c969dcf",
@@ -196,6 +196,22 @@ export const ERA39_PUBLISHES = [
     tx: "0xf197cb76814284676fb41ee3cad7e07452a309adab6f1a1616608d41de6e874d",
     validator: "0xd40a5b57ee622816c3cf13cfb58bbb44c60b2b03f9fc838386816aea05b0ac47",
     era: 39,
+    score: 100,
+    grade: "A",
+  },
+  {
+    block: 234726,
+    tx: "0xbb5f03f2f0c16c27a1fba61e47953252b839f30dbcef0ba1992ba1a65a04af8a",
+    validator: "0x849a279f6c2ad8f0a66953cb89bdeff513b1a4ded437e41cb7dbd69726176b0c",
+    era: 64,
+    score: 100,
+    grade: "A",
+  },
+  {
+    block: 234727,
+    tx: "0x045bfa8c6b17ca8b08b3d5ac91e51443194de4420d03a61e63ab9004163ddd59",
+    validator: "0xd40a5b57ee622816c3cf13cfb58bbb44c60b2b03f9fc838386816aea05b0ac47",
+    era: 64,
     score: 100,
     grade: "A",
   },
