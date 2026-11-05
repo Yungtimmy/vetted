@@ -16,6 +16,7 @@ Scores are read live from the `ScoreRegistry` contract on PortaldotV3 Test (chai
 | Contract | `0xeebc363c7af7ed8e888da07e959043517ae4b97d` |
 | Deployed at block | 107303 |
 | Source | [`contracts/ScoreRegistry.sol`](contracts/ScoreRegistry.sol) |
+| Bytecode | PASS. Local resolc 1.4.0 matches `eth_getCode`. See [`contracts/ONCHAIN_MATCH.md`](contracts/ONCHAIN_MATCH.md). |
 | EVM RPC | `https://test-evm-rpc-v3.portaldot.dev` |
 | Substrate RPC | `wss://test-node-v3.portaldot.dev` |
 | Explorer | [V3 testnet scanner](https://scanner-testnet-v3.portaldot.dev) |
