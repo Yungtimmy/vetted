@@ -7,14 +7,17 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --experimental-strip-types --import ./scripts/register-ts.mjs --test lib/scorer.test.ts",
+    "test": "node --experimental-strip-types --import ./scripts/register-ts.mjs --test lib/scorer.test.ts lib/staking-inputs.test.ts",
     "score": "node --experimental-strip-types --import ./scripts/register-ts.mjs scripts/score-validator.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@noble/hashes": "^2.4.0",
+    "blakejs": "^1.2.1",
     "next": "16.4.0",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "xxhashjs": "^0.2.2"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",

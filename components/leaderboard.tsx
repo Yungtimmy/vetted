@@ -294,8 +294,8 @@ export function Leaderboard({
             Data as of era {formatEra(overview.era)}. Grades update when a new score is
             published.
             {overview.stakingTracked === false
-              ? " Staking fields (commission, era points, slashes) are not read from Substrate yet."
-              : ""}
+              ? " Staking fields could not be read from Substrate."
+              : " Commission, self-stake, and era points are read from Substrate. Chill events are not available on this chain."}
           </p>
         </>
       ) : null}

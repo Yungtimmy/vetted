@@ -10,10 +10,12 @@ export function Sparkline({
   const width = 100;
   const height = 20;
   const last = Math.max(values.length - 1, 1);
+  const peak = Math.max(...values, 0);
+  const span = peak > 0 ? peak : 1;
   const points = values
     .map((value, index) => {
       const x = (index / last) * width;
-      const y = Math.min(height, Math.max(0, height - value));
+      const y = height - (Math.max(0, value) / span) * (height - 1);
       return `${x.toFixed(1)},${y.toFixed(1)}`;
     })
     .join(" ");
