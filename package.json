@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "node --experimental-strip-types --import ./scripts/register-ts.mjs --test lib/scorer.test.ts",
+    "score": "node --experimental-strip-types --import ./scripts/register-ts.mjs scripts/score-validator.ts",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "next": "16.4.0",

@@ -49,7 +49,7 @@ export function ReportSkeleton() {
       <p className="sr-only">Loading report</p>
       <Bar className="h-3 w-28" />
       <Bar className="mt-3 h-8 w-64 max-w-full" />
-      <div className="mt-5 grid gap-3 lg:grid-cols-[200px_minmax(0,1fr)_minmax(0,1fr)]">
+      <div className="mt-5 grid gap-3 lg:grid-cols-[200px_minmax(0,1fr)]">
         <section className="card flex flex-col items-start gap-3">
           <Bar className="h-14 w-14 rounded-[10px]" />
           <Bar className="h-5 w-16" />

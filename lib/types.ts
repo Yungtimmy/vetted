@@ -13,13 +13,27 @@ export const VALIDATOR_SOURCE_LABEL: Record<ValidatorSource, string> = {
 
 export type HistoryKind = "COMMISSION" | "CHILL" | "SLASH";
 
-/** One line in the "why this score" breakdown. */
+/**
+ * One line in the score breakdown.
+ * v1 rows come from lib/scorer.ts. points is the signed contribution.
+ */
 export interface ScoreFactor {
+  id?: string;
   label: string;
-  /** Absolute points. Set on the base row. */
+  /** Signed points added into the 0-100 total. */
   points?: number;
-  /** Signed point change. Set on every row except the base. */
+  /** Signed point change. Older rows used this instead of points. */
   delta?: number;
+  /**
+   * v1 proposed weight, pending founder approval.
+   * For the base row this is the starting 100. For the others it is the
+   * maximum deduction.
+   */
+  weight?: number;
+  /** Raw input before normalization. */
+  raw?: number;
+  /** Raw input with units, for the breakdown table. */
+  rawLabel?: string;
 }
 
 export interface HistoryEvent {

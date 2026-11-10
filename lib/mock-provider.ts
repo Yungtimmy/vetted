@@ -5,12 +5,12 @@ import {
   NETWORK_NAME,
   SLASH_WINDOW_ERAS,
 } from "@/lib/config";
-import { totalFromFactors, weightedSetScore } from "@/lib/scoring";
+import { scoreValidator } from "@/lib/scorer";
+import { gradeForScore, totalFromFactors, weightedSetScore } from "@/lib/scoring";
 import type {
   HistoryEvent,
   NetworkOverview,
   RewardBar,
-  ScoreFactor,
   Validator,
   ValidatorDataProvider,
   ValidatorSource,
@@ -49,8 +49,6 @@ interface Draft {
   name: string;
   ss58: string;
   h160: string;
-  grade: Validator["grade"];
-  score: number | null;
   commissionPercent: number;
   slashes: number;
   chills: number;
@@ -62,7 +60,6 @@ interface Draft {
   pointsSpread: number;
   rewardSeed: number;
   slashIndexes: number[];
-  factors: ScoreFactor[];
   history: HistoryEvent[];
   scoreTx: string | null;
   /** Omitted rows stand in for mainnet-history scores. */
@@ -70,13 +67,22 @@ interface Draft {
 }
 
 function build(draft: Draft): Validator {
+  const series = eraPoints(draft.pointsSeed, draft.pointsFloor, draft.pointsSpread);
+  const scored = scoreValidator({
+    activeEras: draft.activeEras,
+    eraPoints: series,
+    commissionPercent: draft.commissionPercent,
+    chills: draft.chills,
+    slashes: draft.slashes,
+    selfStake: draft.selfStake,
+  });
   return {
     id: draft.id,
     name: draft.name,
     ss58: draft.ss58,
     h160: draft.h160,
-    grade: draft.grade,
-    score: draft.score,
+    grade: scored.grade,
+    score: scored.score,
     commissionPercent: draft.commissionPercent,
     slashes: draft.slashes,
     chills: draft.chills,
@@ -84,9 +90,9 @@ function build(draft: Draft): Validator {
     selfStake: draft.selfStake,
     stakeWeight: draft.stakeWeight,
     active: true,
-    eraPoints: eraPoints(draft.pointsSeed, draft.pointsFloor, draft.pointsSpread),
+    eraPoints: series,
     rewards: rewards(draft.rewardSeed, draft.slashIndexes),
-    factors: draft.factors,
+    factors: scored.factors,
     history: draft.history,
     scoreTx: draft.scoreTx,
     source: draft.source ?? "mainnet-history",
@@ -99,8 +105,6 @@ const drafts: Draft[] = [
     name: "Lagos Validator",
     ss58: "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
     h160: "0x11aa44c0b19e77d0aa11",
-    grade: "A",
-    score: 94,
     commissionPercent: 3,
     slashes: 0,
     chills: 0,
@@ -112,11 +116,6 @@ const drafts: Draft[] = [
     pointsSpread: 8,
     rewardSeed: 101,
     slashIndexes: [],
-    factors: [
-      { label: "Base score", points: 100 },
-      { label: "Steady rewards for 84 eras", delta: 2 },
-      { label: "Era points dipped in era 1,198", delta: -8 },
-    ],
     history: [],
     scoreTx: "0xa11c90b21d44aa01c0e1",
   },
@@ -125,8 +124,6 @@ const drafts: Draft[] = [
     name: "Ibadan Infra",
     ss58: "5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty",
     h160: "0x22bb18c04d77a091bb22",
-    grade: "A",
-    score: 91,
     commissionPercent: 5,
     slashes: 0,
     chills: 1,
@@ -138,11 +135,6 @@ const drafts: Draft[] = [
     pointsSpread: 8,
     rewardSeed: 202,
     slashIndexes: [],
-    factors: [
-      { label: "Base score", points: 100 },
-      { label: "Chilled once in last 30 eras", delta: -3 },
-      { label: "Short offline stretch in era 1,110", delta: -6 },
-    ],
     history: [
       { id: "ibadan-chill", kind: "CHILL", summary: "Chilled", era: 1251 },
     ],
@@ -155,8 +147,6 @@ const drafts: Draft[] = [
     name: "Abuja Secure",
     ss58: "5DAAnrj7VHTznn2AWBemMuyBwZWs6FNFjdyVXUeYum3PTXFy",
     h160: "0x33cc90a14e22b801cc33",
-    grade: "A",
-    score: 88,
     commissionPercent: 2,
     slashes: 0,
     chills: 0,
@@ -168,11 +158,6 @@ const drafts: Draft[] = [
     pointsSpread: 8,
     rewardSeed: 303,
     slashIndexes: [],
-    factors: [
-      { label: "Base score", points: 100 },
-      { label: "Era points below peers over 30 eras", delta: -14 },
-      { label: "Steady rewards for 84 eras", delta: 2 },
-    ],
     history: [],
     scoreTx: "0xc33e12f090bb44d0cc33",
   },
@@ -181,8 +166,6 @@ const drafts: Draft[] = [
     name: "Okra Labs",
     ss58: "5HGjWAeFDfFCWPsjFQdVV2Msvz2XtMktvgocEZcCj68kUMaw",
     h160: "0x44dd12b80c55e091dd44",
-    grade: "B",
-    score: 72,
     commissionPercent: 5,
     slashes: 0,
     chills: 3,
@@ -194,12 +177,6 @@ const drafts: Draft[] = [
     pointsSpread: 9,
     rewardSeed: 404,
     slashIndexes: [],
-    factors: [
-      { label: "Base score", points: 100 },
-      { label: "Chilled three times in last 30 eras", delta: -9 },
-      { label: "Uneven era points", delta: -21 },
-      { label: "Steady rewards for 84 eras", delta: 2 },
-    ],
     history: [
       { id: "okra-1", kind: "CHILL", summary: "Chilled", era: 1240 },
       { id: "okra-2", kind: "CHILL", summary: "Chilled", era: 1255 },
@@ -212,8 +189,6 @@ const drafts: Draft[] = [
     name: "Kola Staking",
     ss58: "5CiPPseXPECbkjWCa6MnjNokrgYjMqmKndv2rSnekmSK2DjL",
     h160: "0x8f2ab7c14e9033aa41c0",
-    grade: "B",
-    score: 67,
     commissionPercent: 7,
     slashes: 1,
     chills: 2,
@@ -225,13 +200,6 @@ const drafts: Draft[] = [
     pointsSpread: 8,
     rewardSeed: 505,
     slashIndexes: [20],
-    factors: [
-      { label: "Base score", points: 100 },
-      { label: "Slashed once in era 412", delta: -25 },
-      { label: "Chilled twice in last 30 eras", delta: -6 },
-      { label: "Commission raised 5% → 7% in era 1,201", delta: -4 },
-      { label: "Steady rewards for 84 eras", delta: 2 },
-    ],
     history: [
       {
         id: "kola-com",
@@ -255,8 +223,6 @@ const drafts: Draft[] = [
     name: "NorthStar Node",
     ss58: "5GNJqTPyNqANBkUVMN1LPPrRuvrP4B8pJ7b5qH1sT9uV3wXy",
     h160: "0x55ee90c14a22d801ee55",
-    grade: "C",
-    score: 54,
     commissionPercent: 10,
     slashes: 0,
     chills: 4,
@@ -268,12 +234,6 @@ const drafts: Draft[] = [
     pointsSpread: 10,
     rewardSeed: 606,
     slashIndexes: [],
-    factors: [
-      { label: "Base score", points: 100 },
-      { label: "Chilled four times in last 30 eras", delta: -12 },
-      { label: "Commission sitting at 10%", delta: -10 },
-      { label: "Unsteady era points", delta: -24 },
-    ],
     history: [
       { id: "ns-1", kind: "CHILL", summary: "Chilled", era: 1220 },
       { id: "ns-2", kind: "CHILL", summary: "Chilled", era: 1244 },
@@ -287,8 +247,6 @@ const drafts: Draft[] = [
     name: "Delta Stake",
     ss58: "5FLSigC9HGRKVhB9FiEo4Y3koPsNmBmLJbpXg2mp1hXcS59Y",
     h160: "0x66ff14d80b33a091ff66",
-    grade: "D",
-    score: 38,
     commissionPercent: 15,
     slashes: 1,
     chills: 6,
@@ -300,13 +258,6 @@ const drafts: Draft[] = [
     pointsSpread: 11,
     rewardSeed: 707,
     slashIndexes: [48],
-    factors: [
-      { label: "Base score", points: 100 },
-      { label: "Slashed once in era 900", delta: -25 },
-      { label: "Chilled six times in last 30 eras", delta: -18 },
-      { label: "Commission raised 10% → 15%", delta: -21 },
-      { label: "Steady self-stake", delta: 2 },
-    ],
     history: [
       {
         id: "delta-com",
@@ -326,8 +277,6 @@ const drafts: Draft[] = [
     name: "Rogue Ops",
     ss58: "5DfhGyQd3kL6nP8rT1vX4yZ7aC9eH2jM5pS8uW1yB4dG7k",
     h160: "0x7701ab44c0ee22107701",
-    grade: "F",
-    score: 12,
     commissionPercent: 25,
     slashes: 3,
     chills: 9,
@@ -339,12 +288,6 @@ const drafts: Draft[] = [
     pointsSpread: 16,
     rewardSeed: 808,
     slashIndexes: [12, 40, 60],
-    factors: [
-      { label: "Base score", points: 100 },
-      { label: "Slashed three times, latest in era 1,090", delta: -63 },
-      { label: "Chilled nine times in last 30 eras", delta: -18 },
-      { label: "Commission raised to 25%", delta: -7 },
-    ],
     history: [
       { id: "rogue-1", kind: "SLASH", summary: "1.2% of stake", era: 1090 },
       { id: "rogue-2", kind: "SLASH", summary: "0.8% of stake", era: 860 },
@@ -364,8 +307,6 @@ const drafts: Draft[] = [
     name: "Harmattan Node",
     ss58: "5Ck5SLSH2mN7pQ9rT4vX8yA1cE6gJ3kM6pS9uW2yB5dH8",
     h160: "0x8802cc55d14aa0918802",
-    grade: "NEW",
-    score: null,
     commissionPercent: 4,
     slashes: 0,
     chills: 0,
@@ -377,7 +318,6 @@ const drafts: Draft[] = [
     pointsSpread: 3,
     rewardSeed: 909,
     slashIndexes: [],
-    factors: [],
     history: [],
     scoreTx: null,
     // Stands in for one of the two validators in the testnet session set.
@@ -396,7 +336,7 @@ function assertMock(list: Validator[]): void {
       throw new Error(`${validator.id} reward window length`);
     }
     if (validator.score == null) {
-      if (validator.grade !== "NEW") {
+      if (validator.grade !== "NEW" || validator.factors.length !== 0) {
         throw new Error(`${validator.id} is unscored but graded ${validator.grade}`);
       }
       continue;
@@ -404,7 +344,12 @@ function assertMock(list: Validator[]): void {
     const total = totalFromFactors(validator.factors);
     if (total !== validator.score) {
       throw new Error(
-        `${validator.id} factors total ${total}, published score ${validator.score}`,
+        `${validator.id} factors total ${total}, displayed score ${validator.score}`,
+      );
+    }
+    if (gradeForScore(validator.score) !== validator.grade) {
+      throw new Error(
+        `${validator.id} grade ${validator.grade} does not match score ${validator.score}`,
       );
     }
   }
@@ -415,15 +360,15 @@ function assertMock(list: Validator[]): void {
     return validator;
   });
   const setScore = weightedSetScore(defaults);
-  if (setScore !== 86) {
-    throw new Error(`default nomination set scores ${setScore}, expected 86`);
+  if (setScore == null) {
+    throw new Error("default nomination set has no score");
   }
   const harmattan = list.find((validator) => validator.id === "harmattan-node");
   if (!harmattan || harmattan.grade !== "NEW" || harmattan.score != null) {
     throw new Error("harmattan-node should be an unscored NEW validator");
   }
   const withNew = weightedSetScore([...defaults, harmattan]);
-  if (withNew !== 86) {
+  if (withNew !== setScore) {
     throw new Error(`NEW validator changed the set score to ${withNew}`);
   }
   const live = list.filter((validator) => validator.source === "testnet-live");
