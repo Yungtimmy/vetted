@@ -18,7 +18,10 @@ import {
   shortHex,
   shortSs58,
 } from "@/lib/format";
-import type { HistoryKind, Validator } from "@/lib/types";
+import { breakdownForValidator, type ScoreResult } from "@/lib/scorer";
+import { FORMULA_STATUS, SCORING_DOC_URL } from "@/lib/scoring-config";
+import { SCORING_CONFIG_SHA256 } from "@/lib/scoring-hash";
+import type { HistoryKind, ScoreFactor, Validator } from "@/lib/types";
 
 const TAG: Record<HistoryKind, string> = {
   COMMISSION: "var(--grade-d)",
@@ -108,9 +111,11 @@ function ScoredReport({
 }) {
   const total = validator.score ?? 0;
   const marked = validator.rewards.some((bar) => bar.slashed);
+  const breakdown = breakdownForValidator(validator);
+  const verifyHref = explorerTxHref(validator.scoreTx, validator.scoreBlock);
 
   return (
-    <div className="grid grid-cols-1 gap-3 lg:grid-cols-[200px_minmax(0,1fr)_minmax(0,1fr)]">
+    <div className="grid grid-cols-1 gap-3 lg:grid-cols-[200px_minmax(0,1fr)]">
       <section className="card flex flex-col items-start gap-4">
         <h2 className="text-[13px] font-medium tracking-normal text-muted">Grade</h2>
         <GradeSeal grade={validator.grade} />
@@ -120,40 +125,20 @@ function ScoredReport({
             <span className="text-sm font-normal text-dim">/100</span>
           </div>
           <p className="mt-2 font-mono text-[11px] leading-4 text-dim">
-            Era {formatEra(era)} · published on-chain
+            {breakdown.status === "manual"
+              ? `Era ${formatEra(era)} · published on-chain`
+              : "v1 scorer"}
           </p>
         </div>
       </section>
 
-      <section className="card">
-        <h2 className="mb-4 text-[13px] font-medium tracking-normal text-muted">
-          Why this score
-        </h2>
-        <div>
-          {validator.factors.map((factor) => (
-            <div className="fx" key={factor.label}>
-              <span className="text-muted">{factor.label}</span>
-              <span
-                className={`font-mono tabular-nums ${
-                  factor.delta != null && factor.delta < 0
-                    ? "neg"
-                    : factor.delta != null && factor.delta > 0
-                      ? "pos"
-                      : ""
-                }`}
-              >
-                {factor.delta == null ? factor.points : formatDelta(factor.delta)}
-              </span>
-            </div>
-          ))}
-          <div className="fx fx-total">
-            <span>Total</span>
-            <span className="font-mono tabular-nums">{total}</span>
-          </div>
-        </div>
-      </section>
+      {breakdown.status === "scored" ? (
+        <ScorerBreakdown result={breakdown} verifyHref={verifyHref} />
+      ) : breakdown.status === "manual" ? (
+        <ManualBreakdown score={total} era={era} verifyHref={verifyHref} />
+      ) : null}
 
-      <section className="card">
+      <section className="card lg:col-span-2">
         <h2 className="mb-4 text-[13px] font-medium tracking-normal text-muted">History</h2>
         {validator.stakingTracked === false ? (
           <p className="text-[13px] text-dim">No era history yet</p>
@@ -186,7 +171,7 @@ function ScoredReport({
         )}
       </section>
 
-      <section className="card lg:col-span-3">
+      <section className="card lg:col-span-2">
         <h2 className="mb-4 text-[13px] font-medium tracking-normal text-muted">
           Rewards per era · last {SLASH_WINDOW_ERAS} eras
           {validator.stakingTracked !== false && marked ? (
@@ -202,6 +187,159 @@ function ScoredReport({
         )}
       </section>
     </div>
+  );
+}
+
+function pointsClass(points: number): string {
+  if (points > 0) return "pos";
+  if (points < 0) return "neg";
+  return "text-dim";
+}
+
+function ScoringLinks({ verifyHref }: { verifyHref: string }) {
+  return (
+    <p className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-[13px]">
+      <TextLink href={SCORING_DOC_URL} className="link">
+        How scoring works
+      </TextLink>
+      <TextLink href={verifyHref} className="link">
+        Verify on-chain
+      </TextLink>
+    </p>
+  );
+}
+
+function FormulaStamp() {
+  return (
+    <p className="mt-4 font-mono text-[11px] leading-4 break-all text-dim">
+      {FORMULA_STATUS}
+      <br />
+      sha256 {SCORING_CONFIG_SHA256}
+    </p>
+  );
+}
+
+function ScorerBreakdown({
+  result,
+  verifyHref,
+}: {
+  result: Extract<ScoreResult, { status: "scored" }>;
+  verifyHref: string;
+}) {
+  const total = result.factors.reduce((sum, factor) => sum + (factor.points ?? 0), 0);
+
+  return (
+    <section className="card" aria-labelledby="score-breakdown">
+      <h2
+        id="score-breakdown"
+        className="mb-4 text-[13px] font-medium tracking-normal text-muted"
+      >
+        Score breakdown
+      </h2>
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse text-[13px]">
+          <caption className="sr-only">
+            Factor name, weight, raw value, and points. The points sum to the score.
+          </caption>
+          <thead>
+            <tr className="text-left text-[12px] text-dim">
+              <th scope="col" className="h-9 border-b border-line pr-3 font-normal">
+                Factor
+              </th>
+              <th scope="col" className="h-9 border-b border-line px-3 font-normal">
+                Weight
+              </th>
+              <th scope="col" className="h-9 border-b border-line px-3 font-normal">
+                Raw
+              </th>
+              <th
+                scope="col"
+                className="h-9 border-b border-line pl-3 text-right font-normal"
+              >
+                Points
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {result.factors.map((factor) => (
+              <FactorRow factor={factor} key={factor.id ?? factor.label} />
+            ))}
+          </tbody>
+          <tfoot>
+            <tr>
+              <th scope="row" className="pt-3 text-left font-medium">
+                Total
+              </th>
+              <td />
+              <td />
+              <td className="pt-3 text-right font-mono font-medium tabular-nums">
+                {total}
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <p className="mt-3 text-xs leading-4 text-dim">
+        Weight is the maximum deduction, except the base, which starts at 100.
+        Points are this validator&apos;s signed share of that weight.
+      </p>
+      <FormulaStamp />
+      <ScoringLinks verifyHref={verifyHref} />
+    </section>
+  );
+}
+
+function FactorRow({ factor }: { factor: ScoreFactor }) {
+  const points = factor.points ?? factor.delta ?? 0;
+  return (
+    <tr>
+      <th scope="row" className="border-b border-line py-2.5 pr-3 text-left font-normal text-muted">
+        {factor.label}
+      </th>
+      <td className="border-b border-line px-3 font-mono tabular-nums">
+        {factor.weight ?? "—"}
+      </td>
+      <td className="border-b border-line px-3 font-mono tabular-nums">
+        {factor.rawLabel ?? (factor.raw == null ? "—" : factor.raw)}
+      </td>
+      <td
+        className={`border-b border-line py-2.5 pl-3 text-right font-mono tabular-nums ${pointsClass(points)}`}
+      >
+        {formatDelta(points)}
+      </td>
+    </tr>
+  );
+}
+
+function ManualBreakdown({
+  score,
+  era,
+  verifyHref,
+}: {
+  score: number;
+  era: number;
+  verifyHref: string;
+}) {
+  return (
+    <section className="card" aria-labelledby="score-breakdown">
+      <h2
+        id="score-breakdown"
+        className="mb-4 text-[13px] font-medium tracking-normal text-muted"
+      >
+        Score breakdown
+      </h2>
+      <div className="fx">
+        <span className="text-muted">On-chain score</span>
+        <span className="font-mono tabular-nums">{score}</span>
+      </div>
+      <p className="mt-3 text-[13px] leading-5 text-muted">
+        Era {formatEra(era)} was entered by hand and published before the v1
+        scorer. The number above is the ScorePublished value. The v1 weights
+        did not produce it. The next publish will use the v1 scorer.
+      </p>
+      <FormulaStamp />
+      <ScoringLinks verifyHref={verifyHref} />
+    </section>
   );
 }
 
@@ -256,6 +394,11 @@ function NewReport({ validator }: { validator: Validator }) {
         </div>
         <p className="mt-2.5 text-xs text-dim">
           No grade yet. New validators are never marked F just for being new.
+        </p>
+        <p className="mt-4">
+          <TextLink href={SCORING_DOC_URL} className="link">
+            How scoring works
+          </TextLink>
         </p>
       </section>
     </div>

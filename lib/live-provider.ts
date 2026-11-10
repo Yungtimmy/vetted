@@ -43,7 +43,9 @@ function toValidator(score: PublishedScore): Validator {
     active: true,
     eraPoints: [],
     rewards: [],
-    factors: [{ label: `Published score, era ${score.era}`, points: score.score }],
+    // Published by hand. Leave the factor list empty so the page does not
+    // explain this score with the v1 weights.
+    factors: [],
     history: [],
     scoreTx: score.txHash,
     scoreBlock: score.blockNumber,

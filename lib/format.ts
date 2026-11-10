@@ -41,7 +41,8 @@ export function shortHex(value: string): string {
 
 export function formatDelta(delta: number): string {
   if (delta > 0) return `+${delta}`;
-  return `−${Math.abs(delta)}`;
+  if (delta < 0) return `−${Math.abs(delta)}`;
+  return "0";
 }
 
 export function parseBond(value: string): number {

@@ -73,7 +73,7 @@ flowchart LR
   P -->|"getDataProvider()"| W["Next.js site<br/>tryvetted.vercel.app"]
 ```
 
-The scorer is not part of this repo; it writes scores with `publish`. The site only reads: `lib/score-registry.ts` decodes the logs, `lib/active-set.ts` reads the current session validators to filter out non-validators, and `lib/live-provider.ts` maps the latest score per validator into the screens.
+`lib/scorer.ts` is a v1 proposal, pending founder approval. It does not publish. Scores already on ScoreRegistry were entered by hand. See [SCORING.md](SCORING.md). The site reads published scores back: `lib/score-registry.ts` decodes the logs, `lib/active-set.ts` reads the current session validators to filter out non-validators, and `lib/live-provider.ts` maps the latest score per validator into the screens. When staking fields are still unread, the report says the published score was entered by hand instead of explaining it with the v1 weights.
 
 ## Screens
 
@@ -138,7 +138,11 @@ Pages do not import data directly. They call `getDataProvider()` from `lib/data.
 | `lib/live-provider.ts` | Default provider: latest on-chain score per active validator. |
 | `lib/mock-provider.ts` | Sample validators, used only with `NEXT_PUBLIC_DATA_SOURCE=mock`. |
 | `lib/chain-events.ts` | Pallet event names and field order for a future indexer. |
+| `lib/scorer.ts` | v1 score from staking inputs. Proposed, pending founder approval. Does not publish. |
+| `lib/scoring-config.ts` | Weights, grade bands, and the canonical config JSON. |
+| `lib/scoring-hash.ts` | SHA-256 of that JSON. |
 | `lib/scoring.ts` | Grade bands, stake-weighted set score, nomination warnings. |
+| `SCORING.md` | The v1 formula, the config hash, and how to recompute a score. |
 | `lib/format.ts` | Address shortening, era and token formatting, explorer links. |
 
 ## Chain notes

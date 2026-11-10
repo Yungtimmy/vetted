@@ -3,14 +3,14 @@ import {
   ERA_POINTS_WINDOW,
   SLASH_WINDOW_ERAS,
 } from "@/lib/config";
+import { GRADE_BANDS } from "@/lib/scoring-config";
 import type { Grade, ScoreFactor, Validator } from "@/lib/types";
 
-/** Bands that match the sample set: 88+ A, 67 B, 54 C, 38 D, 12 F. */
-export function gradeForScore(score: number): Grade {
-  if (score >= 85) return "A";
-  if (score >= 65) return "B";
-  if (score >= 50) return "C";
-  if (score >= 30) return "D";
+/** Same bands the ScoreRegistry contract enforces: A 85, B 65, C 50, D 30, else F. */
+export function gradeForScore(score: number): Exclude<Grade, "NEW"> {
+  for (const band of GRADE_BANDS) {
+    if (score >= band.minScore) return band.grade;
+  }
   return "F";
 }
 
