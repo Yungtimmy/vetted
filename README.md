@@ -36,7 +36,7 @@ The scanner is a hash app. `#/blocks/{height}?tab=events` opens the block; a `/b
 
 An earlier test publish for Alice's dev account (era 1285, block 107808, tx `0xcf69a7c7600b6c896460da472f4f2049d732a3fecbd344c074737b12ac9b1894`) is still on the contract. Alice is not a validator on this chain, so the site hides her (`lib/active-set.ts`).
 
-Not live yet: staking fields from the Substrate side (commission, slashes, chills, stake, era points) are not read, so they show as zero or empty. The wallet step in `/nominate` is still mocked and does not submit `staking.nominate`.
+Staking inputs for the v1 breakdown are read from the Substrate RPC: era points, current commission, self-stake, and slash rows. Chill events are not available on this chain, so that row is 0 and labeled as such. The wallet step in `/nominate` is still mocked and does not submit `staking.nominate`.
 
 ## Portaldot ecosystem
 
@@ -73,7 +73,7 @@ flowchart LR
   P -->|"getDataProvider()"| W["Next.js site<br/>tryvetted.vercel.app"]
 ```
 
-`lib/scorer.ts` is a v1 proposal, pending founder approval. It does not publish. Scores already on ScoreRegistry were entered by hand. See [SCORING.md](SCORING.md). The site reads published scores back: `lib/score-registry.ts` decodes the logs, `lib/active-set.ts` reads the current session validators to filter out non-validators, and `lib/live-provider.ts` maps the latest score per validator into the screens. When staking fields are still unread, the report says the published score was entered by hand instead of explaining it with the v1 weights.
+`lib/scorer.ts` is a v1 proposal, pending founder approval. It does not publish. Scores already on ScoreRegistry were entered by hand. See [SCORING.md](SCORING.md). The site reads published scores back from `lib/score-registry.ts`. `lib/staking-inputs.ts` reads era points, commission, self-stake, and slash rows from the Substrate RPC and the report shows that v1 breakdown beside the published score. When they differ, the card says the published era was entered by hand. Chill events are not available on this chain.
 
 ## Screens
 
@@ -134,8 +134,10 @@ Pages do not import data directly. They call `getDataProvider()` from `lib/data.
 | `lib/types.ts` | `Validator`, `NetworkOverview`, and `ValidatorDataProvider`. |
 | `lib/config.ts` | Env-driven chain id, RPCs, token, contract address and deploy block, with confirmed testnet defaults. |
 | `lib/score-registry.ts` | Reads and decodes `ScorePublished` logs from the contract. |
-| `lib/active-set.ts` | Reads `Session.Validators` over the Substrate RPC. |
-| `lib/live-provider.ts` | Default provider: latest on-chain score per active validator. |
+| `lib/active-set.ts` | Cached read of `Session.Validators`. |
+| `lib/session-validators.ts` | Uncached session read used by the score CLI. |
+| `lib/staking-inputs.ts` | Era points, commission, self-stake, and slash rows for the v1 scorer. |
+| `lib/live-provider.ts` | Published score plus the v1 breakdown from those inputs. |
 | `lib/mock-provider.ts` | Sample validators, used only with `NEXT_PUBLIC_DATA_SOURCE=mock`. |
 | `lib/chain-events.ts` | Pallet event names and field order for a future indexer. |
 | `lib/scorer.ts` | v1 score from staking inputs. Proposed, pending founder approval. Does not publish. |

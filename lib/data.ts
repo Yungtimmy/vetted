@@ -7,9 +7,8 @@ import type { ValidatorDataProvider } from "@/lib/types";
  * The only import pages should use to read validator data.
  *
  * Live (default): latest ScorePublished log per validator from the
- * ScoreRegistry contract over the EVM RPC (`NEXT_PUBLIC_EVM_RPC_URL`,
- * `NEXT_PUBLIC_SCORE_REGISTRY_ADDRESS`). Staking fields from the
- * Substrate RPC are not read yet.
+ * ScoreRegistry contract over the EVM RPC, plus staking inputs from
+ * the Substrate RPC for the v1 breakdown.
  *
  * Set `NEXT_PUBLIC_DATA_SOURCE=mock` to use the sample validators.
  */

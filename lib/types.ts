@@ -94,6 +94,8 @@ export interface Validator {
    * the chain yet. Screens show "Not tracked yet" instead of zeros.
    */
   stakingTracked?: boolean;
+  /** Limits of the chain read that produced this breakdown. */
+  scoreNotes?: string[];
 }
 
 export interface NetworkOverview {

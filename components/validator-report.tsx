@@ -18,7 +18,6 @@ import {
   shortHex,
   shortSs58,
 } from "@/lib/format";
-import { breakdownForValidator, type ScoreResult } from "@/lib/scorer";
 import { FORMULA_STATUS, SCORING_DOC_URL } from "@/lib/scoring-config";
 import { SCORING_CONFIG_SHA256 } from "@/lib/scoring-hash";
 import type { HistoryKind, ScoreFactor, Validator } from "@/lib/types";
@@ -111,8 +110,8 @@ function ScoredReport({
 }) {
   const total = validator.score ?? 0;
   const marked = validator.rewards.some((bar) => bar.slashed);
-  const breakdown = breakdownForValidator(validator);
   const verifyHref = explorerTxHref(validator.scoreTx, validator.scoreBlock);
+  const fromChain = validator.stakingTracked === true && validator.factors.length > 0;
 
   return (
     <div className="grid grid-cols-1 gap-3 lg:grid-cols-[200px_minmax(0,1fr)]">
@@ -125,18 +124,34 @@ function ScoredReport({
             <span className="text-sm font-normal text-dim">/100</span>
           </div>
           <p className="mt-2 font-mono text-[11px] leading-4 text-dim">
-            {breakdown.status === "manual"
+            {fromChain
               ? `Era ${formatEra(era)} · published on-chain`
-              : "v1 scorer"}
+              : validator.stakingTracked === false
+                ? `Era ${formatEra(era)} · published on-chain`
+                : "v1 scorer"}
           </p>
         </div>
       </section>
 
-      {breakdown.status === "scored" ? (
-        <ScorerBreakdown result={breakdown} verifyHref={verifyHref} />
-      ) : breakdown.status === "manual" ? (
+      {fromChain ? (
+        <ScorerBreakdown
+          factors={validator.factors}
+          publishedScore={validator.score}
+          era={era}
+          notes={validator.scoreNotes ?? []}
+          verifyHref={verifyHref}
+        />
+      ) : validator.factors.length > 0 ? (
+        <ScorerBreakdown
+          factors={validator.factors}
+          publishedScore={null}
+          era={era}
+          notes={[]}
+          verifyHref={verifyHref}
+        />
+      ) : (
         <ManualBreakdown score={total} era={era} verifyHref={verifyHref} />
-      ) : null}
+      )}
 
       <section className="card lg:col-span-2">
         <h2 className="mb-4 text-[13px] font-medium tracking-normal text-muted">History</h2>
@@ -178,9 +193,9 @@ function ScoredReport({
             <span className="font-normal text-dim"> · red marks a slash</span>
           ) : null}
         </h2>
-        {validator.stakingTracked === false ? (
+        {validator.rewards.length === 0 ? (
           <p className="py-6 text-[13px] text-dim">
-            No reward series yet — Substrate staking fields are not wired
+            No per-era payout series. Uptime uses era points.
           </p>
         ) : (
           <RewardsChart rewards={validator.rewards} />
@@ -220,13 +235,20 @@ function FormulaStamp() {
 }
 
 function ScorerBreakdown({
-  result,
+  factors,
+  publishedScore,
+  era,
+  notes,
   verifyHref,
 }: {
-  result: Extract<ScoreResult, { status: "scored" }>;
+  factors: ScoreFactor[];
+  publishedScore: number | null;
+  era: number;
+  notes: string[];
   verifyHref: string;
 }) {
-  const total = result.factors.reduce((sum, factor) => sum + (factor.points ?? 0), 0);
+  const total = factors.reduce((sum, factor) => sum + (factor.points ?? 0), 0);
+  const differs = publishedScore != null && publishedScore !== total;
 
   return (
     <section className="card" aria-labelledby="score-breakdown">
@@ -261,7 +283,7 @@ function ScorerBreakdown({
             </tr>
           </thead>
           <tbody>
-            {result.factors.map((factor) => (
+            {factors.map((factor) => (
               <FactorRow factor={factor} key={factor.id ?? factor.label} />
             ))}
           </tbody>
@@ -283,6 +305,17 @@ function ScorerBreakdown({
         Weight is the maximum deduction, except the base, which starts at 100.
         Points are this validator&apos;s signed share of that weight.
       </p>
+      {differs ? (
+        <p className="mt-3 text-[13px] leading-5 text-muted">
+          Published score {publishedScore}. This v1 total is {total}. Era {formatEra(era)}{" "}
+          was entered by hand.
+        </p>
+      ) : null}
+      {notes.map((note) => (
+        <p className="mt-2 text-xs leading-4 text-dim" key={note}>
+          {note}
+        </p>
+      ))}
       <FormulaStamp />
       <ScoringLinks verifyHref={verifyHref} />
     </section>
